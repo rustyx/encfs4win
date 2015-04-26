@@ -32,8 +32,8 @@ class Cipher;
 class NameIO
 {
 public:
-    typedef shared_ptr<NameIO> (*Constructor)( const rel::Interface &iface,
-	    const shared_ptr<Cipher> &cipher, const CipherKey &key);
+    typedef boost::shared_ptr<NameIO> (*Constructor)( const rel::Interface &iface,
+	    const boost::shared_ptr<Cipher> &cipher, const CipherKey &key);
 
     struct Algorithm
     {
@@ -45,10 +45,10 @@ public:
     typedef std::list<Algorithm> AlgorithmList;
     static AlgorithmList GetAlgorithmList( bool includeHidden = false );
 
-    static shared_ptr<NameIO> New( const rel::Interface &iface,
-	    const shared_ptr<Cipher> &cipher, const CipherKey &key);
-    static shared_ptr<NameIO> New( const std::string &name,
-	    const shared_ptr<Cipher> &cipher, const CipherKey &key);
+    static boost::shared_ptr<NameIO> New( const rel::Interface &iface,
+	    const boost::shared_ptr<Cipher> &cipher, const CipherKey &key);
+    static boost::shared_ptr<NameIO> New( const std::string &name,
+	    const boost::shared_ptr<Cipher> &cipher, const CipherKey &key);
 
     static bool Register( const char *name, const char *description,
 	    const rel::Interface &iface, Constructor constructor, 

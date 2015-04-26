@@ -104,10 +104,10 @@ bool NameIO::Register( const char *name, const char *description,
     return true;
 }
 
-shared_ptr<NameIO> NameIO::New( const string &name, 
-	const shared_ptr<Cipher> &cipher, const CipherKey &key)
+boost::shared_ptr<NameIO> NameIO::New( const string &name, 
+	const boost::shared_ptr<Cipher> &cipher, const CipherKey &key)
 {
-    shared_ptr<NameIO> result;
+    boost::shared_ptr<NameIO> result;
     if(gNameIOMap)
     {
 	NameIOMap_t::const_iterator it = gNameIOMap->find( name );
@@ -120,10 +120,10 @@ shared_ptr<NameIO> NameIO::New( const string &name,
     return result;
 }
 
-shared_ptr<NameIO> NameIO::New( const rel::Interface &iface,
-	const shared_ptr<Cipher> &cipher, const CipherKey &key )
+boost::shared_ptr<NameIO> NameIO::New( const rel::Interface &iface,
+	const boost::shared_ptr<Cipher> &cipher, const CipherKey &key )
 {
-    shared_ptr<NameIO> result;
+    boost::shared_ptr<NameIO> result;
     if(gNameIOMap)
     {
 	NameIOMap_t::const_iterator it;

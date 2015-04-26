@@ -48,9 +48,9 @@ EncFS_Context::~EncFS_Context()
     openFiles.clear();
 }
 
-shared_ptr<DirNode> EncFS_Context::getRoot(int *errCode)
+boost::shared_ptr<DirNode> EncFS_Context::getRoot(int *errCode)
 {
-    shared_ptr<DirNode> ret;
+    boost::shared_ptr<DirNode> ret;
     do
     {
 	{
@@ -73,7 +73,7 @@ shared_ptr<DirNode> EncFS_Context::getRoot(int *errCode)
     return ret;
 }
 
-void EncFS_Context::setRoot(const shared_ptr<DirNode> &r)
+void EncFS_Context::setRoot(const boost::shared_ptr<DirNode> &r)
 {
     Lock lock( contextMutex );
 
@@ -84,7 +84,7 @@ void EncFS_Context::setRoot(const shared_ptr<DirNode> &r)
 
 bool EncFS_Context::isMounted()
 {
-    return root;
+    return root != 0;
 }
 
 int EncFS_Context::getAndResetUsageCounter()
@@ -104,7 +104,7 @@ int EncFS_Context::openFileCount() const
     return openFiles.size();
 }
 
-shared_ptr<FileNode> EncFS_Context::lookupNode(const char *path)
+boost::shared_ptr<FileNode> EncFS_Context::lookupNode(const char *path)
 {
     Lock lock( contextMutex );
 
@@ -116,7 +116,7 @@ shared_ptr<FileNode> EncFS_Context::lookupNode(const char *path)
 	return (*it->second.begin())->node;
     } else
     {
-	return shared_ptr<FileNode>();
+	return boost::shared_ptr<FileNode>();
     }
 }
 
@@ -133,7 +133,7 @@ void EncFS_Context::renameNode(const char *from, const char *to)
     }
 }
 
-shared_ptr<FileNode> EncFS_Context::getNode(void *pl)
+boost::shared_ptr<FileNode> EncFS_Context::getNode(void *pl)
 {
     Placeholder *ph = (Placeholder*)pl;
     return ph->node;

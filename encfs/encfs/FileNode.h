@@ -84,7 +84,7 @@ private:
 
     FSConfigPtr fsConfig;
 
-    shared_ptr<FileIO> io;
+    boost::shared_ptr<FileIO> io;
     std::string _pname; // plaintext name
     std::string _cname; // encrypted name
     DirNode *parent;

@@ -31,7 +31,7 @@ public:
 	result in a warning message from encfs -- the garbled data will still
 	be made available..
     */
-    MACFileIO( const shared_ptr<FileIO> &base,
+    MACFileIO( const boost::shared_ptr<FileIO> &base,
                const FSConfigPtr &cfg );
     MACFileIO();
     virtual ~MACFileIO();
@@ -54,8 +54,8 @@ private:
     virtual ssize_t readOneBlock( const IORequest &req ) const;
     virtual bool writeOneBlock( const IORequest &req );
 
-    shared_ptr<FileIO> base;
-    shared_ptr<Cipher> cipher;
+    boost::shared_ptr<FileIO> base;
+    boost::shared_ptr<Cipher> cipher;
     CipherKey key;
     int macBytes;
     int randBytes;

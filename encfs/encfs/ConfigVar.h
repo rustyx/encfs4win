@@ -31,7 +31,7 @@ class ConfigVar
 	int offset;
     };
 
-    shared_ptr<ConfigVarData> pd;
+    boost::shared_ptr<ConfigVarData> pd;
 
 public:
     ConfigVar();

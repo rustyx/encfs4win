@@ -970,7 +970,7 @@ bool selectZeroBlockPassThrough()
 }
 
 RootPtr createV6Config( EncFS_Context *ctx,
-        const shared_ptr<EncFS_Opts> &opts )
+        const boost::shared_ptr<EncFS_Opts> &opts )
 {
     const std::string rootDir = opts->rootDir;
     bool enableIdleTracking = opts->idleTracking;
@@ -1114,7 +1114,7 @@ RootPtr createV6Config( EncFS_Context *ctx,
 	}
     }
 
-    shared_ptr<Cipher> cipher = Cipher::New( alg.name, keySize );
+    boost::shared_ptr<Cipher> cipher = Cipher::New( alg.name, keySize );
     if(!cipher)
     {
 	rError(_("Unable to instanciate cipher %s, key size %i, block size %i"),
@@ -1126,7 +1126,7 @@ RootPtr createV6Config( EncFS_Context *ctx,
 	    alg.name.c_str(), keySize, blockSize);
     }
     
-    shared_ptr<EncFSConfig> config( new EncFSConfig );
+    boost::shared_ptr<EncFSConfig> config( new EncFSConfig );
 
     config->cfgType = Config_V6;
     config->cipherIface = cipher->Interface();
@@ -1203,7 +1203,7 @@ RootPtr createV6Config( EncFS_Context *ctx,
 	return rootInfo;
 
     // fill in config struct
-    shared_ptr<NameIO> nameCoder = NameIO::New( config->nameIface,
+    boost::shared_ptr<NameIO> nameCoder = NameIO::New( config->nameIface,
 	    cipher, volumeKey );
     if(!nameCoder)
     {
@@ -1229,15 +1229,17 @@ RootPtr createV6Config( EncFS_Context *ctx,
     rootInfo = RootPtr( new EncFS_Root );
     rootInfo->cipher = cipher;
     rootInfo->volumeKey = volumeKey;
-    rootInfo->root = shared_ptr<DirNode>( 
+    rootInfo->root = boost::shared_ptr<DirNode>( 
             new DirNode( ctx, rootDir, fsConfig ));
 
     return rootInfo;
 }
 
+
+
 void showFSInfo( const boost::shared_ptr<EncFSConfig> &config )
 {
-    shared_ptr<Cipher> cipher = Cipher::New( config->cipherIface, -1 );
+    boost::shared_ptr<Cipher> cipher = Cipher::New( config->cipherIface, -1 );
     {
 	cout << autosprintf(
 		// xgroup(diag)
@@ -1267,7 +1269,7 @@ void showFSInfo( const boost::shared_ptr<EncFSConfig> &config )
                 config->nameIface.revision(), config->nameIface.age());
 	    
 	// check if we support the filename encoding interface..
-        shared_ptr<NameIO> nameCoder = NameIO::New( config->nameIface,
+        boost::shared_ptr<NameIO> nameCoder = NameIO::New( config->nameIface,
     		cipher, CipherKey() );
 	if(!nameCoder)
 	{
@@ -1350,7 +1352,7 @@ void showFSInfo( const boost::shared_ptr<EncFSConfig> &config )
     cout << "\n";
 }
    
-shared_ptr<Cipher> EncFSConfig::getCipher() const
+boost::shared_ptr<Cipher> EncFSConfig::getCipher() const
 {
     return Cipher::New( cipherIface, keySize );
 }
@@ -1383,7 +1385,7 @@ unsigned char *EncFSConfig::getSaltData() const
 CipherKey EncFSConfig::makeKey(const char *password, int passwdLen)
 {
     CipherKey userKey;
-    shared_ptr<Cipher> cipher = getCipher();
+    boost::shared_ptr<Cipher> cipher = getCipher();
 
     // if no salt is set and we're creating a new password for a new
     // FS type, then initialize salt..
@@ -1583,7 +1585,7 @@ CipherKey EncFSConfig::getNewUserKey()
     return userKey;
 }
 
-RootPtr initFS( EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts )
+RootPtr initFS( EncFS_Context *ctx, const boost::shared_ptr<EncFS_Opts> &opts )
 {
     RootPtr rootInfo;
     boost::shared_ptr<EncFSConfig> config(new EncFSConfig);
@@ -1602,7 +1604,7 @@ RootPtr initFS( EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts )
 	}
 
         // first, instanciate the cipher.
-	shared_ptr<Cipher> cipher = config->getCipher();
+	boost::shared_ptr<Cipher> cipher = config->getCipher();
 	if(!cipher)
 	{
 	    rError(_("Unable to find cipher %s, version %i:%i:%i"),
@@ -1637,7 +1639,7 @@ RootPtr initFS( EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts )
 	    return rootInfo;
 	}
 
-	shared_ptr<NameIO> nameCoder = NameIO::New( config->nameIface, 
+	boost::shared_ptr<NameIO> nameCoder = NameIO::New( config->nameIface, 
 		cipher, volumeKey );
 	if(!nameCoder)
 	{
@@ -1667,7 +1669,7 @@ RootPtr initFS( EncFS_Context *ctx, const shared_ptr<EncFS_Opts> &opts )
 	rootInfo = RootPtr( new EncFS_Root );
 	rootInfo->cipher = cipher;
 	rootInfo->volumeKey = volumeKey;
-	rootInfo->root = shared_ptr<DirNode>( 
+	rootInfo->root = boost::shared_ptr<DirNode>( 
                 new DirNode( ctx, opts->rootDir, fsConfig ));
     } else
     {

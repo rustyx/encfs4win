@@ -3,6 +3,6 @@ dokan
 
 [Dd]ebug*/
 [Rr]elease*/
-*.sdf
+*.*sdf
 *.suo
 UpgradeLog.htm

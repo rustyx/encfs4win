@@ -25,10 +25,10 @@
 using namespace rel;
 using boost::shared_ptr;
 
-static shared_ptr<NameIO> NewNNIO( const Interface &, 
-	const shared_ptr<Cipher> &, const CipherKey & )
+static boost::shared_ptr<NameIO> NewNNIO( const Interface &, 
+	const boost::shared_ptr<Cipher> &, const CipherKey & )
 {
-    return shared_ptr<NameIO>( new NullNameIO() );
+    return boost::shared_ptr<NameIO>( new NullNameIO() );
 }
 
 static Interface NNIOIface("nameio/null", 1, 0, 0);

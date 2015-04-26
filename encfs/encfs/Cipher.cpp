@@ -121,9 +121,9 @@ bool Cipher::Register(const char *name, const char *description,
     return true;
 }
 
-shared_ptr<Cipher> Cipher::New(const string &name, int keyLen)
+boost::shared_ptr<Cipher> Cipher::New(const string &name, int keyLen)
 {
-    shared_ptr<Cipher> result;
+    boost::shared_ptr<Cipher> result;
 
     if(gCipherMap)
     {
@@ -139,9 +139,9 @@ shared_ptr<Cipher> Cipher::New(const string &name, int keyLen)
     return result;
 }
 
-shared_ptr<Cipher> Cipher::New( const rel::Interface &iface, int keyLen )
+boost::shared_ptr<Cipher> Cipher::New( const rel::Interface &iface, int keyLen )
 {
-    shared_ptr<Cipher> result;
+    boost::shared_ptr<Cipher> result;
     if(gCipherMap)
     {
 	CipherMap_t::const_iterator it;

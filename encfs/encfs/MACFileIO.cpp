@@ -57,7 +57,7 @@ int dataBlockSize(const FSConfigPtr &cfg)
             - cfg->config->blockMACRandBytes;
 }
 
-MACFileIO::MACFileIO( const shared_ptr<FileIO> &_base,
+MACFileIO::MACFileIO( const boost::shared_ptr<FileIO> &_base,
                       const FSConfigPtr &cfg )
    : BlockFileIO( dataBlockSize( cfg ), cfg )
    , base( _base )

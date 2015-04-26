@@ -42,8 +42,8 @@ class EncFS_Context;
 class DirTraverse
 {
 public:
-    DirTraverse(const shared_ptr<unix::DIR> &dirPtr, uint64_t iv,
-	        const shared_ptr<NameIO> &naming);
+    DirTraverse(const boost::shared_ptr<unix::DIR> &dirPtr, uint64_t iv,
+	        const boost::shared_ptr<NameIO> &naming);
     DirTraverse(const DirTraverse &src);
     ~DirTraverse();
 
@@ -64,11 +64,11 @@ public:
     std::string nextInvalid();
 private:
 
-    shared_ptr<unix::DIR> dir; // struct DIR
+    boost::shared_ptr<unix::DIR> dir; // struct DIR
     // initialization vector to use.  Not very general purpose, but makes it
     // more efficient to support filename IV chaining..
     uint64_t iv; 
-    shared_ptr<NameIO> naming;
+    boost::shared_ptr<NameIO> naming;
 };
 inline bool DirTraverse::valid() const { return dir != 0; }
 
@@ -98,19 +98,19 @@ public:
     std::string rootDirectory();
 
     // find files
-    shared_ptr<FileNode> lookupNode( const char *plaintextName, 
+    boost::shared_ptr<FileNode> lookupNode( const char *plaintextName, 
 	                      const char *requestor );
 
     /*
 	Combined lookupNode + node->open() call.  If the open fails, then the
 	node is not retained.  If the open succeeds, then the node is returned.
     */
-    shared_ptr<FileNode> openNode( const char *plaintextName, 
+    boost::shared_ptr<FileNode> openNode( const char *plaintextName, 
 	    const char *requestor, int flags, int *openResult );
 
     /* For internal use - open a cipher file directly
     */
-    shared_ptr<FileNode> directLookup( const char *realPath );
+    boost::shared_ptr<FileNode> directLookup( const char *realPath );
 
     std::string cipherPath( const char *plaintextPath );
     std::string cipherPathWithoutRoot( const char *plaintextPath );
@@ -153,8 +153,8 @@ protected:
 	this call has no effect.
 	Returns the FileNode if it was found.
     */
-    shared_ptr<FileNode> renameNode( const char *from, const char *to );
-    shared_ptr<FileNode> renameNode( const char *from, const char *to, 
+    boost::shared_ptr<FileNode> renameNode( const char *from, const char *to );
+    boost::shared_ptr<FileNode> renameNode( const char *from, const char *to, 
 	                             bool forwardMode );
 
     /*
@@ -163,7 +163,7 @@ protected:
 	called after renaming the directory, passing in the plaintext from and
 	to paths.
     */
-    shared_ptr<RenameOp> newRenameOp( const char *from, const char *to );
+    boost::shared_ptr<RenameOp> newRenameOp( const char *from, const char *to );
 
 private:
 
@@ -172,7 +172,7 @@ private:
     bool genRenameList( std::list<RenameEl> &list, const char *fromP,
 	    const char *toP );
     
-    shared_ptr<FileNode> findOrCreate( const char *plainName);
+    boost::shared_ptr<FileNode> findOrCreate( const char *plainName);
 
     pthread_mutex_t mutex;
 
@@ -182,7 +182,7 @@ private:
     std::string rootDir;
     FSConfigPtr fsConfig;
 
-    shared_ptr<NameIO> naming;
+    boost::shared_ptr<NameIO> naming;
 };
 
 #endif

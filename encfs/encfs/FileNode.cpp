@@ -77,11 +77,11 @@ FileNode::FileNode(DirNode *parent_, const FSConfigPtr &cfg,
     this->fsConfig = cfg;
 
     // chain RawFileIO & CipherFileIO
-    shared_ptr<FileIO> rawIO( new RawFileIO( _cname ) );
-    io = shared_ptr<FileIO>( new CipherFileIO( rawIO, fsConfig ));
+    boost::shared_ptr<FileIO> rawIO( new RawFileIO( _cname ) );
+    io = boost::shared_ptr<FileIO>( new CipherFileIO( rawIO, fsConfig ));
 
     if(cfg->config->blockMACBytes || cfg->config->blockMACRandBytes)
-        io = shared_ptr<FileIO>(new MACFileIO(io, fsConfig));
+        io = boost::shared_ptr<FileIO>(new MACFileIO(io, fsConfig));
 }
 
 FileNode::~FileNode()
@@ -111,7 +111,7 @@ string FileNode::plaintextParent() const
     return parentDirectory( _pname );
 }
 
-static bool setIV(const shared_ptr<FileIO> &io, uint64_t iv)
+static bool setIV(const boost::shared_ptr<FileIO> &io, uint64_t iv)
 {
     struct stat stbuf;
     if((io->getAttr(&stbuf) < 0) || S_ISREG(stbuf.st_mode))

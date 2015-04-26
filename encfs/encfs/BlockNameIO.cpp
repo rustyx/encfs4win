@@ -34,14 +34,14 @@ using namespace boost;
 static RLogChannel * Info = DEF_CHANNEL( "info/nameio", Log_Info );
 
 
-static shared_ptr<NameIO> NewBlockNameIO( const Interface &iface,
-	const shared_ptr<Cipher> &cipher, const CipherKey &key )
+static boost::shared_ptr<NameIO> NewBlockNameIO( const Interface &iface,
+	const boost::shared_ptr<Cipher> &cipher, const CipherKey &key )
 {
     int blockSize = 8;
     if(cipher)
 	blockSize = cipher->cipherBlockSize();
 
-    return shared_ptr<NameIO>( new BlockNameIO( iface, cipher, key, blockSize));
+    return boost::shared_ptr<NameIO>( new BlockNameIO( iface, cipher, key, blockSize));
 }
 
 static bool BlockIO_registered = NameIO::Register("Block",
@@ -72,7 +72,7 @@ Interface BlockNameIO::CurrentInterface()
 }
 
 BlockNameIO::BlockNameIO( const rel::Interface &iface,
-	const shared_ptr<Cipher> &cipher, 
+	const boost::shared_ptr<Cipher> &cipher, 
 	const CipherKey &key, int blockSize )
     : _interface( iface.current() )
     , _bs( blockSize )

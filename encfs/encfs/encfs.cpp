@@ -82,7 +82,7 @@ static int withCipherPath( const char *opName, const char *path,
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -117,13 +117,13 @@ static int withFileNode( const char *opName,
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
     try
     {
-	shared_ptr<FileNode> fnode;
+	boost::shared_ptr<FileNode> fnode;
 
 	if(fi != NULL)
 	    fnode = GET_FN(ctx, fi);
@@ -162,7 +162,7 @@ int _do_getattr(FileNode *fnode, struct stat *stbuf)
     if(res == ESUCCESS && S_ISLNK(stbuf->st_mode))
     {
 	EncFS_Context *ctx = context();
-	shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+	boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
 	if(FSRoot)
 	{
 	    // determine plaintext link size..  Easiest to read and decrypt..
@@ -203,7 +203,7 @@ int encfs_getdir(const char *path, fuse_dirh_t h, fuse_dirfil_t filler)
     EncFS_Context *ctx = context();
 
     int res = ESUCCESS;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -248,13 +248,13 @@ int encfs_mknod(const char *path, mode_t mode, dev_t rdev)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
     try
     {
-	shared_ptr<FileNode> fnode = FSRoot->lookupNode( path, "mknod" );
+	boost::shared_ptr<FileNode> fnode = FSRoot->lookupNode( path, "mknod" );
 
 	rLog(Info, "mknod on %s, mode %i, dev %" PRIi64,
 		fnode->cipherName(), mode, (int64_t)rdev);
@@ -274,7 +274,7 @@ int encfs_mknod(const char *path, mode_t mode, dev_t rdev)
 	    // try again using the parent dir's group
 	    string parent = fnode->plaintextParent();
 	    rInfo("trying public filesystem workaround for %s", parent.c_str());
-	    shared_ptr<FileNode> dnode = 
+	    boost::shared_ptr<FileNode> dnode = 
 		FSRoot->lookupNode( parent.c_str(), "mknod" );
 
 	    struct stat st;
@@ -295,7 +295,7 @@ int encfs_mkdir(const char *path, mode_t mode)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -314,7 +314,7 @@ int encfs_mkdir(const char *path, mode_t mode)
 	{
 	    // try again using the parent dir's group
 	    string parent = parentDirectory( path );
-	    shared_ptr<FileNode> dnode = 
+	    boost::shared_ptr<FileNode> dnode = 
 		FSRoot->lookupNode( parent.c_str(), "mkdir" );
 
 	    struct stat st;
@@ -334,7 +334,7 @@ int encfs_unlink(const char *path)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -363,7 +363,7 @@ int encfs_rmdir(const char *path)
 }
 
 int _do_readlink(EncFS_Context *ctx, const string &cyName,
-	tuple<char *, size_t> data )
+	boost::tuple<char *, size_t> data)
 {
     char *buf = data.get<0>();
     size_t size = data.get<1>();
@@ -371,7 +371,7 @@ int _do_readlink(EncFS_Context *ctx, const string &cyName,
 	return -EINVAL;
 #if 0
     int res = ESUCCESS;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -404,7 +404,7 @@ int _do_readlink(EncFS_Context *ctx, const string &cyName,
 int encfs_readlink(const char *path, char *buf, size_t size)
 {
     return withCipherPath( "readlink", path, _do_readlink, 
-	    make_tuple(buf, size) );
+	    boost::make_tuple(buf, size) );
 }
 
 int encfs_symlink(const char *from, const char *to)
@@ -414,7 +414,7 @@ int encfs_symlink(const char *from, const char *to)
 	return -EIO;
 #if 0
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -460,7 +460,7 @@ int encfs_link(const char *from, const char *to)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -480,7 +480,7 @@ int encfs_rename(const char *from, const char *to)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -506,7 +506,7 @@ int encfs_chmod(const char *path, mode_t mode)
 }
 
 int _do_chown(EncFS_Context *, const string &cyName, 
-	tuple<uid_t, gid_t> data)
+	boost::tuple<uid_t, gid_t> data)
 {
 #if 0
     int res = lchown( cyName.c_str(), data.get<0>(), data.get<1>() );
@@ -517,7 +517,7 @@ int _do_chown(EncFS_Context *, const string &cyName,
 
 int encfs_chown(const char *path, uid_t uid, gid_t gid)
 {
-    return withCipherPath( "chown", path, _do_chown, make_tuple(uid, gid));
+    return withCipherPath( "chown", path, _do_chown, boost::make_tuple(uid, gid));
 }
 
 int _do_truncate( FileNode *fnode, off_t size )
@@ -569,13 +569,13 @@ int encfs_open(const char *path, struct fuse_file_info *file)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
     try
     {
-	shared_ptr<FileNode> fnode = 
+	boost::shared_ptr<FileNode> fnode = 
 	    FSRoot->openNode( path, "open", file->flags, &res );
 
 	if(fnode)
@@ -642,7 +642,7 @@ int encfs_release(const char *path, struct fuse_file_info *finfo)
     }
 }
 
-int _do_read(FileNode *fnode, tuple<unsigned char *, size_t, off_t> data)
+int _do_read(FileNode *fnode, boost::tuple<unsigned char *, size_t, off_t> data)
 {
     return fnode->read( data.get<2>(), data.get<0>(), data.get<1>());
 }
@@ -651,7 +651,7 @@ int encfs_read(const char *path, char *buf, size_t size, off_t offset,
 	struct fuse_file_info *file)
 {
     return withFileNode( "read", path, file, _do_read,
-	    make_tuple((unsigned char *)buf, size, offset));
+	    boost::make_tuple((unsigned char *)buf, size, offset));
 }
 
 int _do_fsync(FileNode *fnode, int dataSync)
@@ -665,7 +665,7 @@ int encfs_fsync(const char *path, int dataSync,
     return withFileNode( "fsync", path, file, _do_fsync, dataSync );
 }
 
-int _do_write(FileNode *fnode, tuple<const char *, size_t, off_t> data)
+	int _do_write(FileNode *fnode, boost::tuple<const char *, size_t, off_t> data)
 {
     size_t size = data.get<1>();
     if(fnode->write( data.get<2>(), (unsigned char *)data.get<0>(), size ))
@@ -678,7 +678,7 @@ int encfs_write(const char *path, const char *buf, size_t size,
                      off_t offset, struct fuse_file_info *file)
 {
     return withFileNode("write", path, file, _do_write,
-	    make_tuple(buf, size, offset));
+	    boost::make_tuple(buf, size, offset));
 }
 
 // statfs works even if encfs is detached..
@@ -818,7 +818,7 @@ static uint32_t encfs_win_get_attributes(const char *fn)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -832,7 +832,7 @@ static int encfs_win_set_attributes(const char *fn, uint32_t attr)
     EncFS_Context *ctx = context();
 
     int res = -EIO;
-    shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
+    boost::shared_ptr<DirNode> FSRoot = ctx->getRoot(&res);
     if(!FSRoot)
 	return res;
 
@@ -842,7 +842,7 @@ static int encfs_win_set_attributes(const char *fn, uint32_t attr)
    return -win32_error_to_errno(GetLastError());
 }
 
-static int _do_win_set_times(FileNode *fnode, tuple<const FILETIME *, const FILETIME *, const FILETIME *> data )
+static int _do_win_set_times(FileNode *fnode, boost::tuple<const FILETIME *, const FILETIME *, const FILETIME *> data)
 {
     /* Flush can be called multiple times for an open file, so it doesn't
        close the file.  However it is important to call close() for some
@@ -864,7 +864,7 @@ static int encfs_win_set_times(const char *path, struct fuse_file_info *fi, cons
     if (!fi || !fi->fh)
     {
 	int res = -EIO;
-	shared_ptr<DirNode> FSRoot = context()->getRoot(&res);
+	boost::shared_ptr<DirNode> FSRoot = context()->getRoot(&res);
 	if(!FSRoot)
 	    return res;
 
@@ -884,7 +884,7 @@ static int encfs_win_set_times(const char *path, struct fuse_file_info *fi, cons
 	return res;
     }
     return withFileNode("win_set_times", path, fi, _do_win_set_times,
-                       make_tuple(create, access, modified));
+                       boost::make_tuple(create, access, modified));
 }
 
 void win_encfs_oper_init(fuse_operations &encfs_oper)

@@ -31,15 +31,14 @@ using namespace rlog;
 using boost::shared_ptr;
 using boost::dynamic_pointer_cast;
 
-
 static Interface NullInterface( "nullCipher", 1, 0, 0 );
 static Range NullKeyRange(0);
 static Range NullBlockRange(1,4096,1);
 
-static shared_ptr<Cipher> NewNullCipher(const Interface &iface, int keyLen)
+static boost::shared_ptr<Cipher> NewNullCipher(const Interface &iface, int keyLen)
 {
     (void)keyLen;
-    return shared_ptr<Cipher>( new NullCipher( iface ) );
+    return boost::shared_ptr<Cipher>( new NullCipher( iface ) );
 }
 
 const bool HiddenCipher = true;
@@ -67,7 +66,7 @@ public:
     void operator ()(NullKey *&) {}
 };
 
-shared_ptr<AbstractCipherKey> gNullKey( new NullKey(), NullDestructor() );
+boost::shared_ptr<AbstractCipherKey> gNullKey( new NullKey(), NullDestructor() );
 
 NullCipher::NullCipher(const rel::Interface &iface_)
 {
@@ -125,8 +124,8 @@ void NullCipher::writeKey(const CipherKey &, unsigned char *,
 bool NullCipher::compareKey(const CipherKey &A_, 
 	const CipherKey &B_) const
 {
-    shared_ptr<NullKey> A = dynamic_pointer_cast<NullKey>(A_);
-    shared_ptr<NullKey> B = dynamic_pointer_cast<NullKey>(B_);
+    boost::shared_ptr<NullKey> A = dynamic_pointer_cast<NullKey>(A_);
+    boost::shared_ptr<NullKey> B = dynamic_pointer_cast<NullKey>(B_);
     return A.get() == B.get();
 }
 

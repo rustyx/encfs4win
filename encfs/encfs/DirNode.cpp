@@ -57,8 +57,8 @@ public:
 };
 
 
-DirTraverse::DirTraverse(const shared_ptr<unix::DIR> &_dirPtr,
-	uint64_t _iv, const shared_ptr<NameIO> &_naming)
+DirTraverse::DirTraverse(const boost::shared_ptr<unix::DIR> &_dirPtr,
+	uint64_t _iv, const boost::shared_ptr<NameIO> &_naming)
     : dir( _dirPtr )
     , iv( _iv )
     , naming( _naming )
@@ -89,7 +89,7 @@ DirTraverse::~DirTraverse()
 }
 
 static
-bool _nextName(struct unix::dirent *&de, const shared_ptr<unix::DIR> &dir,
+bool _nextName(struct unix::dirent *&de, const boost::shared_ptr<unix::DIR> &dir,
 	int *fileType, ino_t *inode)
 {
     de = unix::readdir( dir.get() );
@@ -175,11 +175,11 @@ class RenameOp
 {
 private:
     DirNode *dn;
-    shared_ptr< list<RenameEl> > renameList;
+    boost::shared_ptr< list<RenameEl> > renameList;
     list<RenameEl>::const_iterator last;
 
 public:
-    RenameOp( DirNode *_dn, const shared_ptr< list<RenameEl> > &_renameList )
+    RenameOp( DirNode *_dn, const boost::shared_ptr< list<RenameEl> > &_renameList )
 	: dn(_dn), renameList(_renameList)
     {
 	last = renameList->begin();
@@ -196,7 +196,7 @@ public:
 
     operator bool () const
     {
-	return renameList;
+	return renameList != 0;
     }
 
     bool apply();
@@ -417,10 +417,10 @@ DirTraverse DirNode::openDir(const char *plaintextPath)
     if(dir == NULL)
     {
 	rDebug("opendir error %s", strerror(errno));
-	return DirTraverse( shared_ptr<unix::DIR>(), 0, shared_ptr<NameIO>() );
+	return DirTraverse( boost::shared_ptr<unix::DIR>(), 0, boost::shared_ptr<NameIO>() );
     } else
     {
-        shared_ptr<unix::DIR> dp( dir, DirDeleter() );
+        boost::shared_ptr<unix::DIR> dp( dir, DirDeleter() );
 
 	uint64_t iv = 0;
 	// if we're using chained IV mode, then compute the IV at this
@@ -456,7 +456,7 @@ bool DirNode::genRenameList( list<RenameEl> &renameList,
 
     // generate the real destination path, where we expect to find the files..
     rDebug("opendir %s", sourcePath.c_str() );
-    shared_ptr<unix::DIR> dir = shared_ptr<unix::DIR>(
+    boost::shared_ptr<unix::DIR> dir = boost::shared_ptr<unix::DIR>(
 	    unix::opendir( sourcePath.c_str() ), DirDeleter() );
     if(!dir)
 	return false;
@@ -558,18 +558,18 @@ bool DirNode::genRenameList( list<RenameEl> &renameList,
 
     Returns a list of renamed items on success, a null list on failure.
 */
-shared_ptr<RenameOp>
+boost::shared_ptr<RenameOp>
 DirNode::newRenameOp( const char *fromP, const char *toP )
 {
     // Do the rename in two stages to avoid chasing our tail
     // Undo everything if we encounter an error!
-    shared_ptr< list<RenameEl> > renameList(new list<RenameEl>);
+    boost::shared_ptr< list<RenameEl> > renameList(new list<RenameEl>);
     if(!genRenameList( *renameList.get(), fromP, toP ))
     {
 	rWarning("Error during generation of recursive rename list");
-	return shared_ptr<RenameOp>();
+	return boost::shared_ptr<RenameOp>();
     } else
-	return shared_ptr<RenameOp>( new RenameOp(this, renameList) );
+	return boost::shared_ptr<RenameOp>( new RenameOp(this, renameList) );
 }
 
 
@@ -624,9 +624,9 @@ DirNode::rename( const char *fromPlaintext, const char *toPlaintext )
     
     rLog( Info, "rename %s -> %s", fromCName.c_str(), toCName.c_str() );
    
-    shared_ptr<FileNode> toNode = findOrCreate( toPlaintext );
+    boost::shared_ptr<FileNode> toNode = findOrCreate( toPlaintext );
 
-    shared_ptr<RenameOp> renameOp;
+    boost::shared_ptr<RenameOp> renameOp;
     if( hasDirectoryNameDependency() && isDirectory( fromCName.c_str() ))
     {
 	rLog( Info, "recursive rename begin" );
@@ -719,15 +719,15 @@ int DirNode::link( const char *from, const char *to )
     The node is keyed by filename, so a rename means the internal node names
     must be changed.
 */
-shared_ptr<FileNode> DirNode::renameNode( const char *from, const char *to )
+boost::shared_ptr<FileNode> DirNode::renameNode( const char *from, const char *to )
 {
     return renameNode( from, to, true );
 }
 
-shared_ptr<FileNode> DirNode::renameNode( const char *from, const char *to, 
+boost::shared_ptr<FileNode> DirNode::renameNode( const char *from, const char *to, 
 	bool forwardMode )
 {
-    shared_ptr<FileNode> node = findOrCreate( from );
+    boost::shared_ptr<FileNode> node = findOrCreate( from );
 
     if(node)
     {
@@ -752,17 +752,17 @@ shared_ptr<FileNode> DirNode::renameNode( const char *from, const char *to,
     return node;
 }
 
-shared_ptr<FileNode> DirNode::directLookup( const char *path )
+boost::shared_ptr<FileNode> DirNode::directLookup( const char *path )
 {
-    return shared_ptr<FileNode>( 
+    return boost::shared_ptr<FileNode>( 
             new FileNode( this, 
                 fsConfig,
                 "unknown", path ));
 }
 
-shared_ptr<FileNode> DirNode::findOrCreate( const char *plainName)
+boost::shared_ptr<FileNode> DirNode::findOrCreate( const char *plainName)
 {
-    shared_ptr<FileNode> node;
+    boost::shared_ptr<FileNode> node;
     if(ctx)
 	node = ctx->lookupNode( plainName );
 
@@ -783,13 +783,13 @@ shared_ptr<FileNode> DirNode::findOrCreate( const char *plainName)
     return node;
 }
 
-shared_ptr<FileNode>
+boost::shared_ptr<FileNode>
 DirNode::lookupNode( const char *plainName, const char * requestor )
 {
     (void)requestor;
     Lock _lock( mutex );
 
-    shared_ptr<FileNode> node = findOrCreate( plainName );
+    boost::shared_ptr<FileNode> node = findOrCreate( plainName );
 
     return node;
 }
@@ -799,7 +799,7 @@ DirNode::lookupNode( const char *plainName, const char * requestor )
     node on sucess..  This is done in one step to avoid any race conditions
     with the stored state of the file.
 */
-shared_ptr<FileNode>
+boost::shared_ptr<FileNode>
 DirNode::openNode( const char *plainName, const char * requestor, int flags,
 	int *result )
 {
@@ -807,12 +807,12 @@ DirNode::openNode( const char *plainName, const char * requestor, int flags,
     rAssert( result != NULL );
     Lock _lock( mutex );
 
-    shared_ptr<FileNode> node = findOrCreate( plainName );
+    boost::shared_ptr<FileNode> node = findOrCreate( plainName );
 
     if( node && (*result = node->open( flags )) >= 0 )
 	return node;
     else
-	return shared_ptr<FileNode>();
+	return boost::shared_ptr<FileNode>();
 }
 
 int DirNode::unlink( const char *plaintextName )

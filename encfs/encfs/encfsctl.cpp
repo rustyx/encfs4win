@@ -77,7 +77,6 @@ using namespace std;
 using namespace gnu;
 using namespace boost;
 
-
 static int showInfo( int argc, char **argv );
 static int showVersion( int argc, char **argv );
 static int chpasswd( int argc, char **argv );
@@ -243,7 +242,7 @@ static int showInfo( int argc, char **argv )
 static RootPtr initRootInfo(int &argc, char ** &argv)
 {
     RootPtr result;
-    shared_ptr<EncFS_Opts> opts( new EncFS_Opts() );
+    boost::shared_ptr<EncFS_Opts> opts( new EncFS_Opts() );
     opts->createIfNotFound = false;
     opts->checkKey = false;
 
@@ -302,7 +301,7 @@ static RootPtr initRootInfo(const char* crootDir)
 
     if(checkDir( rootDir ))
     {
-	shared_ptr<EncFS_Opts> opts( new EncFS_Opts() );
+	boost::shared_ptr<EncFS_Opts> opts( new EncFS_Opts() );
 	opts->rootDir = rootDir;
 	opts->createIfNotFound = false;
 	opts->checkKey = false;
@@ -398,7 +397,7 @@ static int cmd_ls( int argc, char **argv )
 	    for(string name = dt.nextPlaintextName(); !name.empty(); 
 		    name = dt.nextPlaintextName())
 	    {
-		shared_ptr<FileNode> fnode = 
+		boost::shared_ptr<FileNode> fnode = 
 		    rootInfo->root->lookupNode( name.c_str(), "encfsctl-ls" );
 		struct stat stbuf;
 		fnode->getAttr( &stbuf );
@@ -422,11 +421,11 @@ static int cmd_ls( int argc, char **argv )
 
 // apply an operation to every block in the file
 template<typename T>
-int processContents( const shared_ptr<EncFS_Root> &rootInfo, 
+int processContents( const boost::shared_ptr<EncFS_Root> &rootInfo, 
 	const char *path, T &op )
 {
     int errCode = 0;
-    shared_ptr<FileNode> node = rootInfo->root->openNode( path, "encfsctl",
+    boost::shared_ptr<FileNode> node = rootInfo->root->openNode( path, "encfsctl",
 	    O_RDONLY, &errCode );
 
     if(!node)
@@ -490,7 +489,7 @@ static int cmd_cat( int argc, char **argv )
 }
 
 static int copyLink(const struct stat &stBuf, 
-        const shared_ptr<EncFS_Root> &rootInfo,
+        const boost::shared_ptr<EncFS_Root> &rootInfo,
         const string &cpath, const string &destName )
 {
     scoped_array<char> buf(new char[stBuf.st_size+1]);
@@ -514,10 +513,10 @@ static int copyLink(const struct stat &stBuf,
     return EXIT_SUCCESS;
 }
 
-static int copyContents(const shared_ptr<EncFS_Root> &rootInfo, 
+static int copyContents(const boost::shared_ptr<EncFS_Root> &rootInfo, 
                         const char* encfsName, const char* targetName)
 {
-    shared_ptr<FileNode> node = 
+    boost::shared_ptr<FileNode> node = 
 	rootInfo->root->lookupNode( encfsName, "encfsctl" );
 
     if(!node)
@@ -562,7 +561,7 @@ static bool endsWith(const string &str, char ch)
 	return str[str.length()-1] == ch;
 }
 
-static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo, 
+static int traverseDirs(const boost::shared_ptr<EncFS_Root> &rootInfo, 
 	string volumeDir, string destDir)
 {
     if(!endsWith(volumeDir, '/'))
@@ -574,7 +573,7 @@ static int traverseDirs(const shared_ptr<EncFS_Root> &rootInfo,
     // with the same permissions
     {
         struct stat st;
-        shared_ptr<FileNode> dirNode = 
+        boost::shared_ptr<FileNode> dirNode = 
             rootInfo->root->lookupNode( volumeDir.c_str(), "encfsctl" );
         if(dirNode->getAttr(&st))
             return EXIT_FAILURE;
@@ -642,7 +641,7 @@ static int cmd_export( int argc, char **argv )
     return traverseDirs(rootInfo, "/", destDir);
 }
 
-int showcruft( const shared_ptr<EncFS_Root> &rootInfo, const char *dirName )
+int showcruft( const boost::shared_ptr<EncFS_Root> &rootInfo, const char *dirName )
 {
     int found = 0;
     DirTraverse dt = rootInfo->root->openDir( dirName );
@@ -730,7 +729,7 @@ static int do_chpasswd( bool useStdin, int argc, char **argv )
     }
 
     // instanciate proper cipher
-    shared_ptr<Cipher> cipher = Cipher::New( 
+    boost::shared_ptr<Cipher> cipher = Cipher::New( 
             config->cipherIface, config->keySize );
     if(!cipher)
     {

@@ -18,13 +18,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -45,12 +45,14 @@
     <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>D:\SDK\boost_1_58_0;D:\SDK\rlog-1.4;D:\SDK\OpenSSL-Win32\include;$(IncludePath)</IncludePath>
+    <LibraryPath>d:\SDK\OpenSSL-Win32\lib\VC;D:\SDK\rlog-1.4\win32\Release;D:\PROJ\encfs4win\fuse4win-070d3a2e43de\build\Release;D:\SDK\boost_1_58_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>D:\SDK\boost_1_58_0;D:\SDK\rlog-1.4;D:\SDK\OpenSSL-Win32\include;$(IncludePath)</IncludePath>
+    <LibraryPath>d:\SDK\OpenSSL-Win32\lib\VC;D:\SDK\rlog-1.4\win32\Release;D:\PROJ\encfs4win\fuse4win-070d3a2e43de\build\Release;D:\SDK\boost_1_58_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

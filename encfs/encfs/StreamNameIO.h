@@ -30,7 +30,7 @@ public:
     static rel::Interface CurrentInterface();
 
     StreamNameIO( const rel::Interface &iface,
-	          const shared_ptr<Cipher> &cipher, 
+	          const boost::shared_ptr<Cipher> &cipher, 
 		  const CipherKey &key );
     virtual ~StreamNameIO();
 
@@ -48,7 +48,7 @@ protected:
 	                    uint64_t *iv, char *plaintextName ) const;
 private:
     int _interface;
-    shared_ptr<Cipher> _cipher;
+    boost::shared_ptr<Cipher> _cipher;
     CipherKey _key;
 };
 

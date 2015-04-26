@@ -87,7 +87,7 @@ struct EncFS_Args
     const char *fuseArgv[MaxFuseArgs];
     int fuseArgc;
 
-    shared_ptr<EncFS_Opts> opts;
+    boost::shared_ptr<EncFS_Opts> opts;
 
     // for debugging
     // In case someone sends me a log dump, I want to know how what options are
@@ -192,7 +192,7 @@ char *unslashTerminate(char *src )
 
 
 static 
-bool processArgs(int argc, char *argv[], const shared_ptr<EncFS_Args> &out)
+bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &out)
 {
     // set defaults
     out->isDaemon = true;
@@ -501,7 +501,7 @@ extern "C" int main_encfs(int argc, char *argv[])
 
     // anything that comes from the user should be considered tainted until
     // we've processed it and only allowed through what we support.
-    shared_ptr<EncFS_Args> encfsArgs( new EncFS_Args );
+    boost::shared_ptr<EncFS_Args> encfsArgs( new EncFS_Args );
     for(int i=0; i<MaxFuseArgs; ++i)
 	encfsArgs->fuseArgv[i] = NULL; // libfuse expects null args..
 
@@ -659,7 +659,7 @@ extern "C" int main_encfs(int argc, char *argv[])
 
     // cleanup so that we can check for leaked resources..
     rootInfo.reset();
-    ctx->setRoot( shared_ptr<DirNode>() );
+    ctx->setRoot( boost::shared_ptr<DirNode>() );
 
     MemoryPool::destroyAll();
     openssl_shutdown( encfsArgs->isThreaded );
@@ -681,7 +681,7 @@ static
 void * idleMonitor(void *_arg)
 {
     EncFS_Context *ctx = (EncFS_Context*)_arg;
-    shared_ptr<EncFS_Args> arg = ctx->args;
+    boost::shared_ptr<EncFS_Args> arg = ctx->args;
 
     const int timeoutCycles = 60 * arg->idleTimeout / ActivityCheckInterval;
     int idleCycles = 0;
@@ -731,13 +731,13 @@ void * idleMonitor(void *_arg)
 
 static bool unmountFS(EncFS_Context *ctx)
 {
-    shared_ptr<EncFS_Args> arg = ctx->args;
+    boost::shared_ptr<EncFS_Args> arg = ctx->args;
     if( arg->opts->mountOnDemand )
     {
 	rDebug("Detaching filesystem %s due to inactivity",
 		arg->mountPoint.c_str());
 
-	ctx->setRoot( shared_ptr<DirNode>() );
+	ctx->setRoot( boost::shared_ptr<DirNode>() );
 	return false;
     } else
     {

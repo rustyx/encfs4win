@@ -49,7 +49,7 @@ static bool checkSize( int fsBlockSize, int cipherBlockSize )
 	return false;
 }
 
-CipherFileIO::CipherFileIO( const shared_ptr<FileIO> &_base, 
+CipherFileIO::CipherFileIO( const boost::shared_ptr<FileIO> &_base, 
                             const FSConfigPtr &cfg)
     : BlockFileIO( cfg->config->blockSize, cfg )
     , base( _base )

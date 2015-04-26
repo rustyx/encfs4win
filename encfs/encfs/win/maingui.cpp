@@ -283,7 +283,7 @@ static void createConfig(const std::string& rootDir, bool paranoid, const char* 
 		}
 	}
 
-	shared_ptr<Cipher> cipher = Cipher::New( alg.name, keySize );
+	boost::shared_ptr<Cipher> cipher = Cipher::New( alg.name, keySize );
 	if(!cipher)
 	{
 		TCHAR buf[256];
@@ -292,7 +292,7 @@ static void createConfig(const std::string& rootDir, bool paranoid, const char* 
 		throw truntime_error(buf);
 	}
     
-	shared_ptr<EncFSConfig> config( new EncFSConfig );
+	boost::shared_ptr<EncFSConfig> config( new EncFSConfig );
 
 	config->cfgType = Config_V6;
 	config->cipherIface = cipher->Interface();

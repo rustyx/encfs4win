@@ -29,10 +29,10 @@
 using namespace rel;
 using namespace std;
 
-static shared_ptr<NameIO> NewStreamNameIO( const Interface &iface,
-	const shared_ptr<Cipher> &cipher, const CipherKey &key)
+static boost::shared_ptr<NameIO> NewStreamNameIO( const Interface &iface,
+	const boost::shared_ptr<Cipher> &cipher, const CipherKey &key)
 {
-    return shared_ptr<NameIO>( new StreamNameIO( iface, cipher, key ) );
+    return boost::shared_ptr<NameIO>( new StreamNameIO( iface, cipher, key ) );
 }
 
 static bool StreamIO_registered = NameIO::Register("Stream",
@@ -69,7 +69,7 @@ Interface StreamNameIO::CurrentInterface()
 }
 
 StreamNameIO::StreamNameIO( const rel::Interface &iface,
-	const shared_ptr<Cipher> &cipher, 
+	const boost::shared_ptr<Cipher> &cipher, 
 	const CipherKey &key )
     : _interface( iface.current() )
     , _cipher( cipher )
