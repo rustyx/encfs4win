@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7CDA8189-3B6D-40DC-9C77-1214D81388BA}</ProjectGuid>
+    <RootNamespace>encfs1</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>12.0.21005.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\SDK\boost_1_58_0;D:\SDK\rlog-1.4;D:\SDK\OpenSSL-Win32\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\SDK\boost_1_58_0;D:\SDK\rlog-1.4;D:\SDK\OpenSSL-Win32\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..;../intl;../../boost_1_53_0;../../fuse4win-070d3a2e43de/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=encfs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libeay32MDd.lib;ssleay32MDd.lib;rlog.lib;fuse_static.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../boost_1_53_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Debug;../../fuse4win-070d3a2e43de/build/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>../encfs/encfs.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..;../intl;../../boost_1_53_0;../../fuse4win-070d3a2e43de/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=encfs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libeay32MD.lib;ssleay32MD.lib;rlog.lib;fuse_static.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../boost_1_53_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Release;../../fuse4win-070d3a2e43de/build/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>../encfs/encfs.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\intl\autosprintf.cpp" />
+    <ClCompile Include="..\encfs\base64.cpp" />
+    <ClCompile Include="..\encfs\BlockFileIO.cpp" />
+    <ClCompile Include="..\encfs\BlockNameIO.cpp" />
+    <ClCompile Include="..\encfs\Cipher.cpp" />
+    <ClCompile Include="..\encfs\CipherFileIO.cpp" />
+    <ClCompile Include="..\encfs\CipherKey.cpp" />
+    <ClCompile Include="..\encfs\compatwin.cpp" />
+    <ClCompile Include="..\encfs\win\config.cpp" />
+    <ClCompile Include="..\encfs\ConfigReader.cpp" />
+    <ClCompile Include="..\encfs\ConfigVar.cpp" />
+    <ClCompile Include="..\encfs\Context.cpp" />
+    <ClCompile Include="..\encfs\DirNode.cpp" />
+    <ClCompile Include="..\encfs\win\drives.cpp" />
+    <ClCompile Include="..\encfs\encfs.cpp" />
+    <ClCompile Include="..\encfs\encfsctl.cpp" />
+    <ClCompile Include="..\encfs\FileIO.cpp" />
+    <ClCompile Include="..\encfs\FileNode.cpp" />
+    <ClCompile Include="..\encfs\FileUtils.cpp" />
+    <ClCompile Include="getopt.c" />
+    <ClCompile Include="getopt1.c" />
+    <ClCompile Include="gettimeofday.c" />
+    <ClCompile Include="..\encfs\win\guiutils.cpp" />
+    <ClCompile Include="..\encfs\Interface.cpp" />
+    <ClCompile Include="..\encfs\MACFileIO.cpp" />
+    <ClCompile Include="..\encfs\main.cpp" />
+    <ClCompile Include="..\encfs\win\maingui.cpp" />
+    <ClCompile Include="..\encfs\MemoryPool.cpp" />
+    <ClCompile Include="..\encfs\NameIO.cpp" />
+    <ClCompile Include="..\encfs\NullCipher.cpp" />
+    <ClCompile Include="..\encfs\NullNameIO.cpp" />
+    <ClCompile Include="..\encfs\openssl.cpp" />
+    <ClCompile Include="..\encfs\RawFileIO.cpp" />
+    <ClCompile Include="..\encfs\readpassphrase.cpp" />
+    <ClCompile Include="..\encfs\SSL_Cipher.cpp" />
+    <ClCompile Include="..\encfs\StreamNameIO.cpp" />
+    <ClCompile Include="..\encfs\win\subprocess.cpp" />
+    <ClCompile Include="..\encfs\vasprintf.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\intl\autosprintf.h" />
+    <ClInclude Include="..\encfs\base64.h" />
+    <ClInclude Include="..\encfs\BlockFileIO.h" />
+    <ClInclude Include="..\encfs\BlockNameIO.h" />
+    <ClInclude Include="..\encfs\boost-versioning.h" />
+    <ClInclude Include="..\encfs\Cipher.h" />
+    <ClInclude Include="..\encfs\CipherFileIO.h" />
+    <ClInclude Include="..\encfs\CipherKey.h" />
+    <ClInclude Include="..\config.h" />
+    <ClInclude Include="..\encfs\ConfigReader.h" />
+    <ClInclude Include="..\encfs\ConfigVar.h" />
+    <ClInclude Include="..\encfs\Context.h" />
+    <ClInclude Include="..\encfs\DirNode.h" />
+    <ClInclude Include="..\encfs\encfs.h" />
+    <ClInclude Include="..\encfs\FileIO.h" />
+    <ClInclude Include="..\encfs\FileNode.h" />
+    <ClInclude Include="..\encfs\FileUtils.h" />
+    <ClInclude Include="..\encfs\FSConfig.h" />
+    <ClInclude Include="..\intl\gettext.h" />
+    <ClInclude Include="..\encfs\win\guioverride.h" />
+    <ClInclude Include="..\encfs\win\guiutils.h" />
+    <ClInclude Include="..\encfs\i18n.h" />
+    <ClInclude Include="..\encfs\Interface.h" />
+    <ClInclude Include="..\encfs\MACFileIO.h" />
+    <ClInclude Include="..\encfs\MemoryPool.h" />
+    <ClInclude Include="..\encfs\Mutex.h" />
+    <ClInclude Include="..\encfs\NameIO.h" />
+    <ClInclude Include="..\encfs\NullCipher.h" />
+    <ClInclude Include="..\encfs\NullNameIO.h" />
+    <ClInclude Include="..\encfs\openssl.h" />
+    <ClInclude Include="..\encfs\pthread.h" />
+    <ClInclude Include="..\encfs\Range.h" />
+    <ClInclude Include="..\encfs\RawFileIO.h" />
+    <ClInclude Include="..\encfs\readpassphrase.h" />
+    <ClInclude Include="..\encfs\SSL_Cipher.h" />
+    <ClInclude Include="..\encfs\StreamNameIO.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\encfs\win\resource.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

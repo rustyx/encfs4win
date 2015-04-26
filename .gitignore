@@ -1,2 +1,8 @@
 out
 dokan
+
+[Dd]ebug*/
+[Rr]elease*/
+*.sdf
+*.suo
+UpgradeLog.htm
