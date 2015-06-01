@@ -221,120 +221,6 @@ Cipher::CipherAlgorithm findCipherAlgorithm(const char *name,
 	return result;
 }
 
-
-static void createConfig(const std::string& rootDir, bool paranoid, const char* password)
-{
-	bool reverseEncryption = false;
-	ConfigMode configMode = paranoid ? Config_Paranoia : Config_Standard;
-    
-	int keySize = 0;
-	int blockSize = 0;
-	Cipher::CipherAlgorithm alg;
-	rel::Interface nameIOIface;
-	int blockMACBytes = 0;
-	int blockMACRandBytes = 0;
-	bool uniqueIV = false;
-	bool chainedIV = false;
-	bool externalIV = false;
-	bool allowHoles = true;
-	long desiredKDFDuration = NormalKDFDuration;
-    
-	if (reverseEncryption)
-	{
-		uniqueIV = false;
-		chainedIV = false;
-		externalIV = false;
-		blockMACBytes = 0;
-		blockMACRandBytes = 0;
-	}
-
-	if(configMode == Config_Paranoia)
-	{
-		// look for AES with 256 bit key..
-		// Use block filename encryption mode.
-		// Enable per-block HMAC headers at substantial performance penalty..
-		// Enable per-file initialization vector headers.
-		// Enable filename initialization vector chaning
-		keySize = 256;
-		blockSize = DefaultBlockSize;
-		alg = findCipherAlgorithm("AES", keySize);
-		nameIOIface = BlockNameIO::CurrentInterface();
-		blockMACBytes = 8;
-		blockMACRandBytes = 0; // using uniqueIV, so this isn't necessary
-		uniqueIV = true;
-		chainedIV = true;
-		externalIV = true;
-		desiredKDFDuration = ParanoiaKDFDuration;
-	} else {
-		// xgroup(setup)
-		// AES w/ 192 bit key, block name encoding, per-file initialization
-		// vectors are all standard.
-		keySize = 192;
-		blockSize = DefaultBlockSize;
-		alg = findCipherAlgorithm("AES", keySize);
-		blockMACBytes = 0;
-		externalIV = false;
-		nameIOIface = BlockNameIO::CurrentInterface();
-
-		if (!reverseEncryption)
-		{
-			uniqueIV = true;
-			chainedIV = true;
-		}
-	}
-
-	boost::shared_ptr<Cipher> cipher = Cipher::New( alg.name, keySize );
-	if(!cipher)
-	{
-		TCHAR buf[256];
-		_sntprintf(buf, LENGTH(buf), _T("Unable to instanciate cipher %s, key size %i, block size %i"),
-			alg.name.c_str(), keySize, blockSize);
-		throw truntime_error(buf);
-	}
-    
-	boost::shared_ptr<EncFSConfig> config( new EncFSConfig );
-
-	config->cfgType = Config_V6;
-	config->cipherIface = cipher->Interface();
-	config->keySize = keySize;
-	config->blockSize = blockSize;
-	config->nameIface = nameIOIface;
-	config->creator = "EncFS " VERSION;
-	config->subVersion = V6SubVersion;
-	config->blockMACBytes = blockMACBytes;
-	config->blockMACRandBytes = blockMACRandBytes;
-	config->uniqueIV = uniqueIV;
-	config->chainedNameIV = chainedIV;
-	config->externalIVChaining = externalIV;
-	config->allowHoles = allowHoles;
-
-	config->salt.clear();
-	config->kdfIterations = 0; // filled in by keying function
-	config->desiredKDFDuration = desiredKDFDuration;
-
-	int encodedKeySize = cipher->encodedKeySize();
-	unsigned char *encodedKey = new unsigned char[ encodedKeySize ];
-
-	CipherKey volumeKey = cipher->newRandomKey();
-
-	// get user key and use it to encode volume key
-	CipherKey userKey;
-	userKey = config->makeKey(password, strlen(password));
-
-	cipher->writeKey( volumeKey, encodedKey, userKey );
-	userKey.reset();
-
-	config->assignKeyData(encodedKey, encodedKeySize);
-	delete[] encodedKey;
-
-	if(!volumeKey)
-		throw truntime_error(_T("Failure generating new volume key! ")
-		                         _T("Please report this error."));
-
-	if (!saveConfig( Config_V6, rootDir, config ))
-		throw truntime_error(_T("Error saving configuration file"));
-}
-
 struct OptionsData
 {
 	OptionsData():paranoia(false),drive(0) { password[0] = 0; }
@@ -440,7 +326,7 @@ OpenOrCreate(HWND hwnd)
 		return;
 
 	// add configuration and add new drive
-	createConfig(slashTerminate(wchar_to_utf8_cstr(dir.c_str())), data.paranoia, wchar_to_utf8_cstr(data.password).c_str());
+	createConfig(slashTerminate(wchar_to_utf8_cstr(dir.c_str())), data.paranoia, false, wchar_to_utf8_cstr(data.password).c_str(), true);
 
 	Drives::drive_t dr(Drives::Add(dir, data.drive));
 	if (dr)

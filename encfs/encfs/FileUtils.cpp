@@ -57,6 +57,9 @@
 #include <sstream>
 
 #include "i18n.h"
+#include "win/i18n.h"
+
+#include <tchar.h>
 
 #include <boost/version.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -279,7 +282,7 @@ bool fileExists( const char * fileName )
     }
 }
 
-bool isDirectory( const char *fileName )
+bool isDirectory( const char *fileName ) //FAILS on ANSI, OK on UTF8!!!
 {
     struct stat buf;
     if( !unix::lstat( fileName, &buf ))
@@ -399,8 +402,13 @@ bool readV6Config( const char *configFile,
 	ConfigInfo *info)
 {
     (void)info;
+	fs::ifstream st;
 
-    fs::ifstream st( configFile );
+	//config file is utf8 string?
+	//st.imbue(std::locale(""));
+	string ansi_str = utf8_to_codepage(configFile, CP_ACP);
+	st.open(ansi_str.c_str());
+
     if(st.is_open())
     {
         try
@@ -558,7 +566,12 @@ bool saveConfig( ConfigType type, const string &rootDir,
 bool writeV6Config( const char *configFile, 
         const boost::shared_ptr<EncFSConfig> &config )
 {
-    fs::ofstream st( configFile );
+    fs::ofstream st;
+
+	//config file is utf8 string?
+	//st.imbue(std::locale(""));
+	string ansi_str = utf8_to_codepage(configFile, CP_ACP);
+	st.open(ansi_str.c_str());
     if(!st.is_open())
         return false;
 
@@ -1699,3 +1712,268 @@ int remountFS(EncFS_Context *ctx)
     }
 }
 
+bool createConfig(const std::string& rootDir, bool paranoid, bool reverse_compat, const char* password, bool throw_on_error)
+{
+	bool reverseEncryption = !paranoid && reverse_compat;
+	ConfigMode configMode = paranoid ? Config_Paranoia : Config_Standard;
+
+	int keySize = 0;
+	int blockSize = 0;
+	Cipher::CipherAlgorithm alg;
+	rel::Interface nameIOIface;
+	int blockMACBytes = 0;
+	int blockMACRandBytes = 0;
+	bool uniqueIV = false;
+	bool chainedIV = false;
+	bool externalIV = false;
+	bool allowHoles = true;
+	long desiredKDFDuration = NormalKDFDuration;
+
+	if (reverseEncryption)
+	{
+		uniqueIV = false;
+		chainedIV = false;
+		externalIV = false;
+		blockMACBytes = 0;
+		blockMACRandBytes = 0;
+	}
+
+	if (configMode == Config_Paranoia)
+	{
+		// look for AES with 256 bit key..
+		// Use block filename encryption mode.
+		// Enable per-block HMAC headers at substantial performance penalty..
+		// Enable per-file initialization vector headers.
+		// Enable filename initialization vector chaning
+		keySize = 256;
+		blockSize = DefaultBlockSize;
+		alg = findCipherAlgorithm("AES", keySize);
+		nameIOIface = BlockNameIO::CurrentInterface();
+		blockMACBytes = 8;
+		blockMACRandBytes = 0; // using uniqueIV, so this isn't necessary
+		uniqueIV = true;
+		chainedIV = true;
+		externalIV = true;
+		desiredKDFDuration = ParanoiaKDFDuration;
+	}
+	else {
+		// xgroup(setup)
+		// AES w/ 192 bit key, block name encoding, per-file initialization
+		// vectors are all standard.
+		keySize = 192;
+		blockSize = DefaultBlockSize;
+		alg = findCipherAlgorithm("AES", keySize);
+		blockMACBytes = 0;
+		externalIV = false;
+		nameIOIface = BlockNameIO::CurrentInterface();
+
+		if (!reverseEncryption)
+		{
+			uniqueIV = true;
+			chainedIV = true;
+		}
+	}
+
+	boost::shared_ptr<Cipher> cipher = Cipher::New(alg.name, keySize);
+	if (!cipher)
+	{
+		TCHAR buf[256];
+		_sntprintf(buf, LENGTH(buf), _T("Unable to instanciate cipher %s, key size %i, block size %i"),
+			alg.name.c_str(), keySize, blockSize);
+		if (throw_on_error)
+			throw truntime_error(buf);
+		else
+			return false;
+	}
+
+	boost::shared_ptr<EncFSConfig> config(new EncFSConfig);
+
+	config->cfgType = Config_V6;
+	config->cipherIface = cipher->Interface();
+	config->keySize = keySize;
+	config->blockSize = blockSize;
+	config->nameIface = nameIOIface;
+	config->creator = "EncFS " VERSION;
+	config->subVersion = V6SubVersion;
+	config->blockMACBytes = blockMACBytes;
+	config->blockMACRandBytes = blockMACRandBytes;
+	config->uniqueIV = uniqueIV;
+	config->chainedNameIV = chainedIV;
+	config->externalIVChaining = externalIV;
+	config->allowHoles = allowHoles;
+
+	config->salt.clear();
+	config->kdfIterations = 0; // filled in by keying function
+	config->desiredKDFDuration = desiredKDFDuration;
+
+	int encodedKeySize = cipher->encodedKeySize();
+	unsigned char *encodedKey = new unsigned char[encodedKeySize];
+
+	CipherKey volumeKey = cipher->newRandomKey();
+
+	// get user key and use it to encode volume key
+	CipherKey userKey;
+	userKey = config->makeKey(password, strlen(password));
+
+	cipher->writeKey(volumeKey, encodedKey, userKey);
+	userKey.reset();
+
+	config->assignKeyData(encodedKey, encodedKeySize);
+	delete[] encodedKey;
+
+	if (!volumeKey)
+	{
+		if (throw_on_error)
+			throw truntime_error(_T("Failure generating new volume key! ")
+			_T("Please report this error."));
+		else
+			return false;
+	}
+
+	if (!saveConfig(Config_V6, rootDir, config))
+	{
+		if (throw_on_error)
+			throw truntime_error(_T("Error saving configuration file"));
+		else
+			return false;
+	}
+
+	return true;
+}
+
+bool normalize_stdin_str(char* str)
+{
+	char* pstr = &str[strlen(str) - 1];
+	while (*pstr == '\n' || *pstr == '\r')
+		*pstr-- = '\0';
+
+	return true;
+}
+
+bool read_stdin(string_map& map)
+{
+	map.clear();
+	char buf[512];
+
+	while (true)
+	{
+		char *res = fgets(buf, sizeof(buf) / sizeof(buf[0]), stdin);
+		normalize_stdin_str(buf);
+		char* val = 0;
+		if (!get_str_pair(buf, &val))
+			break;
+
+		map[buf] = val;
+	}
+
+	return true;
+}
+
+bool get_str_pair(char* str_key, char** val)
+{
+	if (!val || !str_key || str_key[0] == ':')
+		return false;
+
+	char* pstr = str_key;
+
+	while (*pstr != ':')
+	{
+		if (*pstr == '\0')
+			return false;
+		pstr++;
+	}
+
+	*pstr = '\0';
+	*val = ++pstr;
+
+	return true;
+}
+
+wstring utf8_to_wstr(const string& str)
+{
+	return codepage_to_wstr(str, CP_UTF8);
+}
+
+wstring codepage_to_wstr(const string& str, unsigned int codepage)
+{
+	if (str.empty())
+		return wstring();
+
+	vector<wchar_t> buf;
+	buf.resize(str.length() + 1);
+
+	int res = MultiByteToWideChar(codepage, 0, str.c_str(), -1, buf.data(), buf.size());
+	if (!res)
+		return wstring();
+
+	return buf.data();
+}
+
+string wstr_to_codepage(const wstring& wstr, unsigned int codepage)
+{
+	if (wstr.empty())
+		return string();
+
+	vector<char> buf;
+	buf.resize(2*(wstr.length() + 1));
+
+	int res = WideCharToMultiByte(codepage, 0, wstr.c_str(), -1, buf.data(), buf.size(), 0, 0);
+	if (!res)
+		return string();
+
+	return buf.data();
+}
+
+string wstr_to_utf8(const wstring& wstr)
+{
+	return wstr_to_codepage(wstr, CP_UTF8);
+}
+
+string utf8_to_codepage(const string& str, unsigned int codepage)
+{
+	wstring wstr = utf8_to_wstr(str);
+	return wstr_to_codepage(wstr, codepage);
+}
+
+string codepage_to_utf8(const string& str, unsigned int codepage)
+{
+	wstring wstr = codepage_to_wstr(str, codepage);
+	return wstr_to_utf8(wstr);
+}
+
+
+wstring get_current_path()
+{
+	wstring str;
+	wchar_t buf[MAX_PATH];
+	if (!GetModuleFileNameW(GetModuleHandleW(0), buf, MAX_PATH))
+		return str;
+
+	str = buf;
+	size_t pos = str.rfind('\\');
+	if (pos == wstring::npos)
+		pos = str.rfind('/');
+
+	if (pos == wstring::npos)
+	{
+		str.clear();
+		return str;
+	}
+
+	str.erase(pos);
+	normalize_dir_path(str);
+
+	return str;
+}
+
+bool decode_config(const string& str, bool& paranoid, bool& reverse_compat)
+{
+	paranoid = false;
+	reverse_compat = false;
+	if (str == "paranoid")
+		paranoid = true;
+	else if (str == "default_lite")
+		reverse_compat = true;
+
+	return true;
+}

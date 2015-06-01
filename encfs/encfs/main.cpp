@@ -124,7 +124,7 @@ static
 void usage(const char *name)
 {
     // xgroup(usage)
-    cerr << autosprintf( _("Build: encfs version %s"), VERSION ) 
+	cerr << autosprintf(_("Build: encfs version %s\nUnofficial build by Erte (%s)"), VERSION, __DATE__)
 	<< "\n\n"
 	// xgroup(usage)
 	<< autosprintf(_("Usage: %s [options] rootDir mountPoint [-- [FUSE Mount Options]]"), name) << "\n\n"
@@ -145,6 +145,8 @@ void usage(const char *name)
 	<< _("  --public\t\t"   "act as a typical multi-user filesystem\n"
 	                  "\t\t\t(encfs must be run as root)\n")
 	<< _("  --reverse\t\t"  "reverse encryption\n")
+	<< _("  --create\t\t"  "create new disk (via stdin)\n")
+	<< _("  --unique=\"TEXT_ID\"\t"  "start process with unique id (only one instance with the same id can be launched)\n")
 
 	// xgroup(usage)
 	<< _("\n"
@@ -190,6 +192,34 @@ char *unslashTerminate(char *src )
     return src;
 }
 
+static bool create_new_disk()
+{
+	string_map map;
+	read_stdin(map);
+
+	string path = get_map_val(map, "path");
+	string pass = get_map_val(map, "pass");
+	string conf = get_map_val(map, "config");
+
+	bool paranoid;
+	bool reverse_compat;
+	decode_config(conf, paranoid, reverse_compat);
+
+	wstring wpath = utf8_to_wstr(path);
+
+	if (pass.empty())
+		return false;
+
+	if (path.empty())
+		return false;
+
+	normalize_dir_path(path);
+
+	if (!createConfig(path, paranoid, reverse_compat, pass.c_str(), false))
+		return false;
+
+	return true;
+}
 
 static 
 bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &out)
@@ -235,6 +265,8 @@ bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &ou
 	{"reverse", 0, 0, 'r'}, // reverse encryption
         {"standard", 0, 0, '1'},  // standard configuration
         {"paranoia", 0, 0, '2'},  // standard configuration
+	{ "create", 0, 0, 'C' },  // create new disk (via stdin)
+	{ "unique", 1, 0, 'U' },  // create new disk (via stdin)
 	{0,0,0,0}
     };
 
@@ -250,7 +282,7 @@ bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &ou
 	// 'm' : mount-on-demand
 	// 'S' : password from stdin
 	// 'o' : arguments meant for fuse
-	int res = getopt_long( argc, argv, "HsSfvdmi:o:",
+	int res = getopt_long( argc, argv, "HsSfvdmCiU:o:",
 		long_options, &option_index);
 
 	if(res == -1)
@@ -285,6 +317,27 @@ bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &ou
 	    out->idleTimeout = strtol( optarg, (char**)NULL, 10);
 	    out->opts->idleTracking = true;
 	    break;
+	case 'U':
+		{
+				std::string str = optarg;
+				if (str.length() < 10)
+				{
+					cerr << _("Mutex didn`t created because of its length should be greater 10") << endl;
+					exit(EXIT_FAILURE);
+				}
+				else
+				{
+					HANDLE mutex = CreateMutexA(0, true, str.c_str());
+					if (!mutex)
+					{
+						cerr << _("Can`t create mutex") << endl;
+						exit(EXIT_FAILURE);
+					}
+					if (GetLastError() == ERROR_ALREADY_EXISTS)
+						exit(EXIT_FAILURE);
+				}
+		}
+		break;
 	case 'k':
 	    out->opts->checkKey = false;
 	    break;
@@ -306,9 +359,14 @@ bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &ou
 	    break;
 	case 'V':
 	    // xgroup(usage)
-	    cerr << autosprintf(_("encfs version %s"), VERSION) << endl;
+		cerr << autosprintf(_("encfs version %s\nUnofficial build by Erte (%s)"), VERSION, __DATE__) << endl;
 	    exit(EXIT_SUCCESS);
 	    break;
+	case 'C':
+		if (!create_new_disk())
+			exit(EXIT_FAILURE);
+		exit(EXIT_SUCCESS);
+		break;
 	case 'H':
 	    FuseUsage();
 	    exit(EXIT_SUCCESS);
@@ -341,7 +399,9 @@ bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &ou
     if(optind+2 <= argc)
     {
 	out->opts->rootDir = slashTerminate( unslashTerminate(argv[optind++]) );
+	out->opts->rootDir = codepage_to_utf8(out->opts->rootDir, CP_ACP);
 	out->mountPoint = unslashTerminate(argv[optind++]);
+	out->mountPoint = codepage_to_utf8(out->mountPoint, CP_ACP);
     } else
     {
 	// no mount point specified
@@ -504,6 +564,9 @@ extern "C" int main_encfs(int argc, char *argv[])
     boost::shared_ptr<EncFS_Args> encfsArgs( new EncFS_Args );
     for(int i=0; i<MaxFuseArgs; ++i)
 	encfsArgs->fuseArgv[i] = NULL; // libfuse expects null args..
+#ifdef _DEBUG
+	MessageBoxA(0, "encfs", "STOP", 0);
+#endif // DEBUG
 
     if(argc == 1 || !processArgs(argc, argv, encfsArgs))
     {

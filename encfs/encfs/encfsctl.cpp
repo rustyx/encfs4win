@@ -27,6 +27,7 @@
 #include "Context.h"
 #include "FileNode.h"
 #include "DirNode.h"
+#include "win/subprocess.h"
 
 #include <rlog/rlog.h>
 #include <rlog/StdioNode.h>
@@ -88,6 +89,8 @@ static int cmd_showcruft( int argc, char **argv );
 static int cmd_cat( int argc, char **argv );
 static int cmd_export( int argc, char **argv );
 static int cmd_showKey( int argc, char **argv );
+static int cmd_mount(int argc, char **argv);
+static int cmd_unmount(int argc, char **argv);
 
 struct CommandOpts
 {
@@ -128,6 +131,12 @@ struct CommandOpts
     {"export", 2, 2, cmd_export, "(root dir) path",
 	// xgroup(usage)
         gettext_noop("  -- decrypts a volume and writes results to path")}, 
+	{ "--mount", 0, 0, cmd_mount, "",
+		// launch(usage)
+		gettext_noop("  -- launch encfs.exe with parameters taking from stdin, check result, then exit") },
+	{ "--unmount", 1, 1, cmd_unmount, "",
+		// launch(usage)
+		gettext_noop("  -- unmount drive using fuse functions") },
     {"--version", 0, 0, showVersion, "", 
 	// xgroup(usage)
 	gettext_noop("  -- print version number and exit")},
@@ -139,7 +148,7 @@ struct CommandOpts
 static
 void usage(const char *name)
 {
-    cerr << autosprintf(_("encfsctl version %s"), VERSION) << "\n"
+    cerr << autosprintf(_("encfsctl version %s\nUnoficial build by Erte (%s)"), VERSION, __DATE__) << "\n"
 	<< _("Usage:\n") 
 	// displays usage commands, eg "./encfs (root dir) ..."
 	// xgroup(usage)
@@ -183,7 +192,7 @@ static int showVersion( int argc, char **argv )
     (void)argc;
     (void)argv;
     // xgroup(usage)
-    cerr << autosprintf(_("encfsctl version %s"), VERSION) << "\n";
+	cerr << autosprintf(_("encfsctl version %s\nUnofficial build by Erte (%s)"), VERSION, __DATE__) << "\n";
 
     return EXIT_SUCCESS;
 }
@@ -641,6 +650,125 @@ static int cmd_export( int argc, char **argv )
     return traverseDirs(rootInfo, "/", destDir);
 }
 
+static int cmd_unmount(int argc, char **argv)
+{
+	if (argc != 2)
+		return EXIT_FAILURE;
+
+	string letter = argv[1];
+	fuse_unmount(letter.c_str(), 0);
+
+	return EXIT_SUCCESS;
+}
+
+static int cmd_mount(int argc, char **argv)
+{
+	string_map map;
+	read_stdin(map);
+
+	wstring cur_dir = get_current_path();
+
+	if (cur_dir.empty())
+		return EXIT_FAILURE;
+
+	cur_dir += L"encfs.exe";
+	
+	wstring letter = utf8_to_wstr(get_map_val(map, "letter"));
+	wstring path = utf8_to_wstr(get_map_val(map, "path"));
+	string pass = get_map_val(map, "pass");
+	wstring label = utf8_to_wstr(get_map_val(map, "label"));
+	wstring tag = utf8_to_wstr(get_map_val(map, "tag"));
+	bool reverse = try_get_map_val(map, "reverse");
+
+	if (pass.empty())
+		return EXIT_FAILURE;
+
+	if (path.empty())
+		return EXIT_FAILURE;
+
+	wstring options;
+	if (reverse)
+		options += L"--reverse";
+
+	options += L" ";
+
+	if (!tag.empty())
+	{
+		options += L"--unique=\"";
+		options += tag;
+		options += L"\"";
+	}
+	
+	options += L" ";
+
+	wstring label_opt;
+	if (!label.empty())
+	{
+		label_opt += L"-- -o volname=\"";
+		label_opt += label;
+		label_opt += L"\"";
+	}
+	
+	wchar_t cmd[2048];
+	wsprintfW(cmd, L"\"%s\" --stdinpass %s \"%s\" %s %s", cur_dir.c_str(), options.c_str(), path.c_str(), letter.c_str(), label_opt.c_str());
+
+	boost::shared_ptr<SubProcessInformations> proc(new SubProcessInformations);
+	proc->creationFlags = CREATE_NO_WINDOW;
+	if (!CreateSubProcess(cmd, proc.get())) 
+	{
+// 		DWORD err = GetLastError();
+// 		_sntprintf(cmd, LENGTH(cmd), _T("Error: %s (%u)"), proc->errorPart, (unsigned)err);
+// 		throw truntime_error(cmd);
+		return EXIT_FAILURE;
+	}
+
+	DWORD written;
+	WriteFile(proc->hIn, pass.c_str(), pass.length(), &written, NULL);
+	CloseHandle(proc->hIn);	// close input so sub process does not any more
+	proc->hIn = NULL;
+
+	//10 seconds to mount drive
+	const int count = 5 * 10;
+	const int interval = 200;
+
+	bool mounted = false;
+	letter += L"\\";
+	// wait for mount, read error and give feedback
+	for (unsigned n = 0; n < count; ++n) 
+	{
+		// drive appeared
+		if (GetDriveType(letter.c_str()) != DRIVE_NO_ROOT_DIR) 
+		{
+// 			if (Drives::autoShow)
+// 				Show(hwnd);
+			break;
+		}
+
+		// process terminated
+		DWORD readed;
+		char output[2048];
+		switch (WaitForSingleObject(proc->hProcess, interval)) 
+		{
+		case WAIT_OBJECT_0:
+		case WAIT_ABANDONED:
+// 			if (ReadFile(proc->hOut, output, sizeof(output)-1, &readed, NULL)) 
+// 			{
+// 				output[readed] = 0;
+// 				utf8_to_wchar_buf(output, cmd, LENGTH(cmd));
+// 			}
+// 			else 
+// 			{
+// 				_stprintf(cmd, _T("Unknown error mounting drive %c:"), mnt[0]);
+// 			}
+// 			subProcess.reset();
+// 			throw truntime_error(cmd);
+			return EXIT_FAILURE;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
 int showcruft( const boost::shared_ptr<EncFS_Root> &rootInfo, const char *dirName )
 {
     int found = 0;
@@ -832,6 +960,10 @@ extern "C" int main_encfsctl(int argc, char **argv)
     slog->subscribeTo( GetGlobalChannel("warning") );
 #ifndef NO_DEBUG
     //slog->subscribeTo( GetGlobalChannel("debug") );
+#endif
+
+#ifdef _DEBUG
+	MessageBoxA(0, "encfsctl", "STOP", 0);
 #endif
 
     if(argc < 2)
