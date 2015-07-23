@@ -124,7 +124,7 @@ static
 void usage(const char *name)
 {
     // xgroup(usage)
-	cerr << autosprintf(_("Build: encfs version %s\nUnofficial build by Erte (%s)"), VERSION, __DATE__)
+	cerr << autosprintf(_("Build: encfs version %s\nUnofficial build by rustyx (%s)"), VERSION, __DATE__)
 	<< "\n\n"
 	// xgroup(usage)
 	<< autosprintf(_("Usage: %s [options] rootDir mountPoint [-- [FUSE Mount Options]]"), name) << "\n\n"
@@ -359,7 +359,7 @@ bool processArgs(int argc, char *argv[], const boost::shared_ptr<EncFS_Args> &ou
 	    break;
 	case 'V':
 	    // xgroup(usage)
-		cerr << autosprintf(_("encfs version %s\nUnofficial build by Erte (%s)"), VERSION, __DATE__) << endl;
+		cerr << autosprintf(_("encfs version %s\nUnofficial build by rustyx (%s)"), VERSION, __DATE__) << endl;
 	    exit(EXIT_SUCCESS);
 	    break;
 	case 'C':
@@ -564,9 +564,9 @@ extern "C" int main_encfs(int argc, char *argv[])
     boost::shared_ptr<EncFS_Args> encfsArgs( new EncFS_Args );
     for(int i=0; i<MaxFuseArgs; ++i)
 	encfsArgs->fuseArgv[i] = NULL; // libfuse expects null args..
-#ifdef _DEBUG
+#ifdef ENCFS_DEBUG
 	MessageBoxA(0, "encfs", "STOP", 0);
-#endif // DEBUG
+#endif
 
     if(argc == 1 || !processArgs(argc, argv, encfsArgs))
     {

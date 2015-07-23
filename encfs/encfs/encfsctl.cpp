@@ -148,7 +148,7 @@ struct CommandOpts
 static
 void usage(const char *name)
 {
-    cerr << autosprintf(_("encfsctl version %s\nUnoficial build by Erte (%s)"), VERSION, __DATE__) << "\n"
+    cerr << autosprintf(_("encfsctl version %s\nUnoficial build by rustyx (%s)"), VERSION, __DATE__) << "\n"
 	<< _("Usage:\n") 
 	// displays usage commands, eg "./encfs (root dir) ..."
 	// xgroup(usage)
@@ -192,7 +192,7 @@ static int showVersion( int argc, char **argv )
     (void)argc;
     (void)argv;
     // xgroup(usage)
-	cerr << autosprintf(_("encfsctl version %s\nUnofficial build by Erte (%s)"), VERSION, __DATE__) << "\n";
+	cerr << autosprintf(_("encfsctl version %s\nUnofficial build by rustyx (%s)"), VERSION, __DATE__) << "\n";
 
     return EXIT_SUCCESS;
 }
@@ -962,7 +962,7 @@ extern "C" int main_encfsctl(int argc, char **argv)
     //slog->subscribeTo( GetGlobalChannel("debug") );
 #endif
 
-#ifdef _DEBUG
+#ifdef ENCFS_DEBUG
 	MessageBoxA(0, "encfsctl", "STOP", 0);
 #endif
 
