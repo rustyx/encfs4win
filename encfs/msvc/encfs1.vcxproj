@@ -57,7 +57,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../intl;../../boost_1_53_0;../../fuse4win-070d3a2e43de/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../intl;../../boost_1_58_0;../../fuse4win-070d3a2e43de/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=encfs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -68,7 +68,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>libeay32MDd.lib;ssleay32MDd.lib;rlog.lib;fuse_static.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../boost_1_53_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Debug;../../fuse4win-070d3a2e43de/build/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost_1_58_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Debug;../../fuse4win-070d3a2e43de/build/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>../encfs/encfs.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -79,7 +79,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..;../intl;../../boost_1_53_0;../../fuse4win-070d3a2e43de/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../intl;../../boost_1_58_0;../../fuse4win-070d3a2e43de/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=encfs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -89,7 +89,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>libeay32MD.lib;ssleay32MD.lib;rlog.lib;fuse_static.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../boost_1_53_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Release;../../fuse4win-070d3a2e43de/build/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost_1_58_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Release;../../fuse4win-070d3a2e43de/build/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>../encfs/encfs.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>

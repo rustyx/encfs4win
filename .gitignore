@@ -6,3 +6,5 @@ dokan
 *.*sdf
 *.suo
 UpgradeLog.htm
+/OpenSSL*/
+/boost*/
