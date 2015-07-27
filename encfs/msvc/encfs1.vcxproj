@@ -44,20 +44,16 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\SDK\boost_1_58_0;D:\SDK\rlog-1.4;D:\SDK\OpenSSL-Win32\include;$(IncludePath)</IncludePath>
-    <LibraryPath>d:\SDK\OpenSSL-Win32\lib\VC;D:\SDK\rlog-1.4\win32\Release;D:\PROJ\encfs4win\fuse4win-070d3a2e43de\build\Release;D:\SDK\boost_1_58_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\SDK\boost_1_58_0;D:\SDK\rlog-1.4;D:\SDK\OpenSSL-Win32\include;$(IncludePath)</IncludePath>
-    <LibraryPath>d:\SDK\OpenSSL-Win32\lib\VC;D:\SDK\rlog-1.4\win32\Release;D:\PROJ\encfs4win\fuse4win-070d3a2e43de\build\Release;D:\SDK\boost_1_58_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../intl;../../boost_1_58_0;../../fuse4win-070d3a2e43de/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../intl;../../boost_1_58_0;../../../dokany/dokan_fuse/include;../../rlog-1.4;../../OpenSSL-Win32/include;../encfs;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ENCFS_EXPORTS;RLOG_COMPONENT=encfs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -67,8 +63,8 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libeay32MDd.lib;ssleay32MDd.lib;rlog.lib;fuse_static.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../boost_1_58_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Debug;../../fuse4win-070d3a2e43de/build/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libeay32MDd.lib;ssleay32MDd.lib;rlog.lib;dokanfuse.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../boost_1_58_0/stage/lib;../../OpenSSL-Win32/lib/VC;../../rlog-1.4/win32/Debug;../../../dokany/Win32/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>../encfs/encfs.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
