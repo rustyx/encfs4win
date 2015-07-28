@@ -475,7 +475,7 @@ int encfs_link(const char *from, const char *to)
     return res;
 }
 
-int encfs_rename(const char *from, const char *to)
+int encfs_rename(const char *from, const char *to, BOOL replace_existing)
 {
     EncFS_Context *ctx = context();
 
@@ -486,7 +486,7 @@ int encfs_rename(const char *from, const char *to)
 
     try
     {
-	res = FSRoot->rename( from, to );
+	res = FSRoot->rename(from, to, replace_existing);
     } catch( rlog::Error &err )
     {
 	rError("error caught in rename");

@@ -138,7 +138,7 @@ public:
     int mkdir( const char *plaintextPath, mode_t mode,
 	    uid_t uid = 0, gid_t gid = 0);
 
-    int rename( const char *fromPlaintext, const char *toPlaintext );
+    int rename(const char *fromPlaintext, const char *toPlaintext, bool replace_existing);
 
     int link( const char *from, const char *to );
     
@@ -163,14 +163,14 @@ protected:
 	called after renaming the directory, passing in the plaintext from and
 	to paths.
     */
-    boost::shared_ptr<RenameOp> newRenameOp( const char *from, const char *to );
+    boost::shared_ptr<RenameOp> newRenameOp(const char *from, const char *to, bool replace_existing);
 
 private:
 
     friend class RenameOp;
 
     bool genRenameList( std::list<RenameEl> &list, const char *fromP,
-	    const char *toP );
+	const char *toP, bool replace_existing);
     
     boost::shared_ptr<FileNode> findOrCreate( const char *plainName);
 

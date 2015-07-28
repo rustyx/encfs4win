@@ -427,14 +427,24 @@ unix::mkdir(const char *fn, int mode)
 	return -1;
 }
 
+namespace unix {
+    int rename(const char *oldpath, const char *newpath, bool replace_existing);
+}
+
 int
-unix::rename(const char *oldpath, const char *newpath)
+unix::rename(const char *oldpath, const char *newpath, bool replace_existing)
 {
-	if (MoveFileW(utf8_to_wfn(oldpath).c_str(), utf8_to_wfn(newpath).c_str()))
+    if (MoveFileExW(utf8_to_wfn(oldpath).c_str(), utf8_to_wfn(newpath).c_str(), replace_existing ? MOVEFILE_REPLACE_EXISTING : 0))
 		return 0;
 	errno = win32_error_to_errno(GetLastError());
 	return -1;
 }
+
+/*int
+unix::rename(const char *oldpath, const char *newpath)
+{
+    return rename(oldpath, newpath, false);
+}*/
 
 int
 unix::unlink(const char *path)

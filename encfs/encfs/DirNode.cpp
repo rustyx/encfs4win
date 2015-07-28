@@ -163,6 +163,7 @@ struct RenameEl
     // ciphertext names
     string oldCName;
     string newCName; // intermediate name (not final cname)
+    bool replace_existing;
 
     // plaintext names
     string oldPName;
@@ -217,6 +218,9 @@ RenameOp::~RenameOp()
         }
     }
 }
+namespace unix {
+    int rename(const char *oldpath, const char *newpath, bool replace_existing);
+}
 
 bool RenameOp::apply()
 {
@@ -237,7 +241,7 @@ bool RenameOp::apply()
 
             // rename on disk..
             if(unix::rename( last->oldCName.c_str(),
-                         last->newCName.c_str() ) == -1)
+                         last->newCName.c_str(), last->replace_existing ) == -1)
             {
                 rWarning("Error renaming %s: %s",
                         last->oldCName.c_str(), strerror( errno ));
@@ -287,7 +291,7 @@ void RenameOp::undo()
         rDebug("undo: renaming %s -> %s", 
                 it->newCName.c_str(), it->oldCName.c_str());
 
-        unix::rename( it->newCName.c_str(), it->oldCName.c_str() );
+        unix::rename( it->newCName.c_str(), it->oldCName.c_str(), false);
         try
         {
             dn->renameNode( it->newPName.c_str(), 
@@ -439,7 +443,7 @@ DirTraverse DirNode::openDir(const char *plaintextPath)
 }
 
 bool DirNode::genRenameList( list<RenameEl> &renameList, 
-	const char *fromP, const char *toP )
+    const char *fromP, const char *toP, bool replace_existing)
 {
     uint64_t fromIV = 0, toIV = 0;
 
@@ -499,6 +503,7 @@ bool DirNode::genRenameList( list<RenameEl> &renameList,
 	    RenameEl ren;
 	    ren.oldCName = oldFull;
 	    ren.newCName = newFull;
+	    ren.replace_existing = replace_existing;
 	    ren.oldPName = string(fromP) + '/' + plainName;
 	    ren.newPName = string(toP) + '/' + plainName;
 	    
@@ -521,7 +526,8 @@ bool DirNode::genRenameList( list<RenameEl> &renameList,
 		// parent, as that is the logical rename order..
 		if(!genRenameList( renameList, 
 			    ren.oldPName.c_str(), 
-			    ren.newPName.c_str()))
+			    ren.newPName.c_str(),
+			    replace_existing))
 		{
 		    return false;
 		}
@@ -559,12 +565,12 @@ bool DirNode::genRenameList( list<RenameEl> &renameList,
     Returns a list of renamed items on success, a null list on failure.
 */
 boost::shared_ptr<RenameOp>
-DirNode::newRenameOp( const char *fromP, const char *toP )
+DirNode::newRenameOp(const char *fromP, const char *toP, bool replace_existing)
 {
     // Do the rename in two stages to avoid chasing our tail
     // Undo everything if we encounter an error!
     boost::shared_ptr< list<RenameEl> > renameList(new list<RenameEl>);
-    if(!genRenameList( *renameList.get(), fromP, toP ))
+    if (!genRenameList(*renameList.get(), fromP, toP, replace_existing))
     {
 	rWarning("Error during generation of recursive rename list");
 	return boost::shared_ptr<RenameOp>();
@@ -613,7 +619,7 @@ int DirNode::mkdir(const char *plaintextPath, mode_t mode,
 }
 
 int 
-DirNode::rename( const char *fromPlaintext, const char *toPlaintext )
+DirNode::rename(const char *fromPlaintext, const char *toPlaintext, bool replace_existing)
 {
     Lock _lock( mutex );
 
@@ -630,7 +636,7 @@ DirNode::rename( const char *fromPlaintext, const char *toPlaintext )
     if( hasDirectoryNameDependency() && isDirectory( fromCName.c_str() ))
     {
 	rLog( Info, "recursive rename begin" );
-	renameOp = newRenameOp( fromPlaintext, toPlaintext );
+	renameOp = newRenameOp(fromPlaintext, toPlaintext, (bool)replace_existing);
 
 	if(!renameOp || !renameOp->apply())
 	{
@@ -651,7 +657,7 @@ DirNode::rename( const char *fromPlaintext, const char *toPlaintext )
 
 	renameNode( fromPlaintext, toPlaintext );
 	toNode.reset();
-	res = unix::rename( fromCName.c_str(), toCName.c_str() );
+	res = unix::rename( fromCName.c_str(), toCName.c_str(), replace_existing);
 
 	if(res == -1)
 	{

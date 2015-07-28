@@ -70,7 +70,7 @@ int encfs_mkdir(const char *path, mode_t mode);
 int encfs_unlink(const char *path);
 int encfs_rmdir(const char *path);
 int encfs_symlink(const char *from, const char *to);
-int encfs_rename(const char *from, const char *to);
+int encfs_rename(const char *from, const char *to, BOOL replace_existing);
 int encfs_link(const char *from, const char *to);
 int encfs_chmod(const char *path, mode_t mode);
 int encfs_chown(const char *path, uid_t uid, gid_t gid);
