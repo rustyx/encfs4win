@@ -18,7 +18,8 @@
 NOTIFYICONDATA niData;
 
 static ULONGLONG GetDllVersion(LPCTSTR lpszDllName);
-static BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
+static void AddTaskbarIcon();
+static BOOL InitInstance();
 static INT_PTR CALLBACK MainDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 static INT_PTR CALLBACK OptionsDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 static INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -120,7 +121,7 @@ extern "C" int main_gui(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */
 		Drives::autoShow = Config::LoadGlobal("AutoShow") != 0;
 	}
 	catch (...) {}
-	if (!InitInstance(hInst, nCmdShow))
+	if (!InitInstance())
 		return 1;
 
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -132,47 +133,58 @@ extern "C" int main_gui(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */
 	return (int) msg.wParam;
 }
 
+static HWND hWnd;
+static UINT s_uTaskbarRestart;
+
+static void
+AddTaskbarIcon()
+{
+    ZeroMemory(&niData, sizeof(NOTIFYICONDATA));
+
+    ULONGLONG dllVersion = GetDllVersion(_T("shell32.dll"));
+    if (dllVersion >= MAKEDLLVERULL(5, 0, 0, 0))
+	niData.cbSize = sizeof(NOTIFYICONDATA);
+    else
+	niData.cbSize = NOTIFYICONDATA_V2_SIZE;
+
+    // the ID number can be anything you choose
+    niData.uID = TRAYICONID;
+
+    // state which structure members are valid
+    niData.uFlags = NIF_ICON | NIF_MESSAGE;
+
+    // load the icon
+    niData.hIcon =
+	(HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_MAIN), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),
+	GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
+
+    // the window to send messages to and the message to send
+    //              note:   the message value should be in the
+    //                              range of WM_APP through 0xBFFF
+    niData.hWnd = hWnd;
+    niData.uCallbackMessage = SWM_TRAYMSG;
+
+    Shell_NotifyIcon(NIM_ADD, &niData);
+
+    // free icon handle
+    if (niData.hIcon && DestroyIcon(niData.hIcon))
+	niData.hIcon = NULL;
+}
+
 // Initialize the window and tray icon
 static BOOL
-InitInstance(HINSTANCE hInstance, int /* nCmdShow */)
+InitInstance()
 {
 	// prepare for XP style controls
 	InitCommonControls();
 
-	HWND hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), NULL, (DLGPROC) MainDlgProc);
+	s_uTaskbarRestart = RegisterWindowMessage(TEXT("TaskbarCreated"));
+
+	hWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_MAIN), NULL, (DLGPROC) MainDlgProc);
 	if (!hWnd)
 		return FALSE;
 
-	ZeroMemory(&niData, sizeof(NOTIFYICONDATA));
-
-	ULONGLONG ullVersion = GetDllVersion(_T("shell32.dll"));
-	if (ullVersion >= MAKEDLLVERULL(5, 0, 0, 0))
-		niData.cbSize = sizeof(NOTIFYICONDATA);
-	else
-		niData.cbSize = NOTIFYICONDATA_V2_SIZE;
-
-	// the ID number can be anything you choose
-	niData.uID = TRAYICONID;
-
-	// state which structure members are valid
-	niData.uFlags = NIF_ICON | NIF_MESSAGE;
-
-	// load the icon
-	niData.hIcon =
-		(HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_MAIN), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),
-				  GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
-
-	// the window to send messages to and the message to send
-	//              note:   the message value should be in the
-	//                              range of WM_APP through 0xBFFF
-	niData.hWnd = hWnd;
-	niData.uCallbackMessage = SWM_TRAYMSG;
-
-	Shell_NotifyIcon(NIM_ADD, &niData);
-
-	// free icon handle
-	if (niData.hIcon && DestroyIcon(niData.hIcon))
-		niData.hIcon = NULL;
+	AddTaskbarIcon();
 
 	// call ShowWindow here to make the dialog initially visible
 	return TRUE;
@@ -489,6 +501,9 @@ MainDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		Shell_NotifyIcon(NIM_DELETE, &niData);
 		PostQuitMessage(0);
 		break;
+	default:
+	    if (message == s_uTaskbarRestart)
+		AddTaskbarIcon();
 	}
 	return 0;
 	}
