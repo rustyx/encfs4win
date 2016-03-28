@@ -114,7 +114,7 @@ static int truncate_handle(HANDLE fd, __int64 length)
 	LONG high = length >> 32;
 	if (!SetFilePointer(fd, (LONG) length, &high, FILE_BEGIN)
 	    || !SetEndOfFile(fd) ) {
-		int save_errno = win32_error_to_errno(GetLastError());
+		int save_errno = ntstatus_error_to_errno(GetLastError());
 		errno = save_errno;
 		return -1;
 	}
@@ -236,7 +236,7 @@ pthread_cond_timedwait (pthread_cond_t *cv,
   DWORD start = GetTickCount();
   DWORD timeout = 0;
   if (abstime)
-    timeout = abstime->tv_sec * 1000 + abstime->tv_nsec / 1000000;
+    timeout = (DWORD)(abstime->tv_sec * 1000 + abstime->tv_nsec / 1000000);
 
   for (;;) {
     // Wait until the event is signaled.
@@ -455,7 +455,7 @@ unix::rmdir(const char *path)
 }
 
 int
-unix::stat(const char *path, struct _stati64 *buffer)
+unix::stat(const char *path, struct stat *buffer)
 {
 	std::wstring fn = utf8_to_wfn(path).c_str();
 	if (fn.length() && fn[fn.length()-1] == L'\\')

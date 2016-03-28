@@ -6,6 +6,11 @@
 #include "guiutils.h"
 #include "resource.h"
 
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#pragma warning(push, 3) // C4047
+HINSTANCE hInst = (HINSTANCE)&__ImageBase; // get hInstance of encfs1.dll
+#pragma warning(pop)
+
 static int CALLBACK BrowseProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
 {
 	if (uMsg == BFFM_INITIALIZED && lpData)

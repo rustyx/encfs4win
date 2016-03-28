@@ -9,7 +9,12 @@
 #include <sys/utime.h>
 #include <string>
 
-#define stat _stati64
+//#define stat _stati64
+#include <fuse_win.h>
+#define stat FUSE_STAT
+#define st_atime st_atim.tv_sec
+#define st_ctime st_ctim.tv_sec
+#define st_mtime st_mtim.tv_sec
 
 typedef HANDLE pthread_t;
 typedef CRITICAL_SECTION pthread_mutex_t;
@@ -48,8 +53,8 @@ int mkdir(const char *fn, int mode);
 int rename(const char *oldpath, const char *newpath);
 int unlink(const char *path);
 int rmdir(const char *path);
-int stat(const char *path, struct _stati64 *buffer);
-static inline int lstat(const char *path, struct _stati64 *buffer) {
+int stat(const char *path, struct stat *buffer);
+static inline int lstat(const char *path, struct stat *buffer) {
 	return unix::stat(path, buffer);
 }
 int chmod (const char*, int);

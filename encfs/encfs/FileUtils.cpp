@@ -1011,7 +1011,7 @@ RootPtr createV6Config( EncFS_Context *ctx,
                 "?> ");
     
         char *res = fgets( answer, sizeof(answer), stdin );
-	(void)res;
+	//(void)res;
         cout << "\n";
     }
 

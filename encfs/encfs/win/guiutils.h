@@ -2,8 +2,7 @@
 #include <string>
 #include "i18n.h"
 
-extern HINSTANCE hFuseDllInstance;
-#define hInst hFuseDllInstance
+extern HINSTANCE hInst;
 
 std::tstring GetExistingDirectory(HWND hwnd, LPCTSTR title = NULL, LPCTSTR caption = NULL);
 bool GetPassword(HWND hwnd, TCHAR *pass, size_t len);

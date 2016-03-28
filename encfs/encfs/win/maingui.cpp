@@ -40,13 +40,13 @@ static void SetPath()
 	SetCurrentDirectory(path);
 }
 
-#define DOKAN_VERSION           600
+#define DOKAN_VERSION           100
 
 static bool CheckDokan()
 {
 	bool res = true;
 
-	HMODULE dll = LoadLibraryA("dokan.dll");
+	HMODULE dll = LoadLibraryA("dokan1.dll");
 	if (!dll)
 		return false;
 
@@ -106,7 +106,7 @@ extern "C" int main_gui(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */
 
 	// check Dokan version
 	if (!CheckDokan()) {
-		MessageBox(NULL, _T("Dokan library not found or wrong version.\r\nencfs4win require Dokan 0.6.0 or later."), _T("EncFS"), MB_ICONERROR);
+		MessageBox(NULL, _T("Dokan library not found or wrong version.\r\nencfs4win require Dokan 1.0.0 or later."), _T("encfs4win"), MB_ICONERROR);
 		EnableAutoStart(false);
 		return 1;
 	}

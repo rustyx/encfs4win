@@ -59,7 +59,7 @@ static __inline int setfsgid(gid_t gid)
 #endif
 
 #define off_t __int64
-#define stat _stati64
+
 int encfs_getattr(const char *path, struct stat *stbuf);
 int encfs_fgetattr(const char *path, struct stat *stbuf, 
 	struct fuse_file_info *fi);
